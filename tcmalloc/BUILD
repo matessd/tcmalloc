@@ -94,6 +94,26 @@ cc_library(
     alwayslink = 1,
 )
 
+# gen libtcmalloc.so file
+cc_binary(
+    name = "libtcmalloc.so",
+    srcs = [
+        "libc_override.h",
+        "libc_override_gcc_and_weak.h",
+        "libc_override_glibc.h",
+        "libc_override_redefine.h",
+        "tcmalloc.cc",
+        "tcmalloc.h",
+    ],
+    copts = TCMALLOC_DEFAULT_COPTS,
+    linkstatic = 1,
+    linkshared = 1,
+    visibility = ["//visibility:public"],
+    deps = tcmalloc_deps + [
+        ":common",
+    ],
+    #alwayslink = 1,
+)
 # Provides tcmalloc always; use per-thread mode.
 #
 cc_library(
