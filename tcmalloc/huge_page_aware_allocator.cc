@@ -634,4 +634,16 @@ void HugePageAwareAllocator::UnbackWithoutLock(void *start, size_t length) {
   pageheap_lock.Lock();
 }
 
+size_t HugePageAwareAllocator::UsedPagesOfHp(void *hpAddr){
+  HugePage hp = HugePageContaining(hpAddr);
+  void *v = Static::pagemap()->GetHugepage(hp.first_page());
+  FillerType::Tracker *pt = reinterpret_cast<FillerType::Tracker *>(v);
+  ASSERT(pt == nullptr || pt->location() == hp);
+  if(pt==nullptr){
+    return 0;
+  }else{
+    return pt->used_pages().raw_num();
+  }
+}
+
 }  // namespace tcmalloc

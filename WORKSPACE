@@ -11,17 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+local_repository(
+  name = "com_google_absl",
+  path = "../abseil-cpp",
+)
 workspace(name = "com_google_tcmalloc")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Abseil
-http_archive(
+"""http_archive(
     name = "com_google_absl",
     urls = ["https://github.com/abseil/abseil-cpp/archive/38db52adb2eabc0969195b33b30763e0a1285ef9.zip"],
     strip_prefix = "abseil-cpp-38db52adb2eabc0969195b33b30763e0a1285ef9",
     sha256 = "64d326dbce25dd05d43482f7029fe91c0412ea0af54b7c3b04b185d076b073cb",
-)
+)"""
 
 # GoogleTest/GoogleMock framework. Used by most unit-tests.
 http_archive(

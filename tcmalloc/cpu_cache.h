@@ -33,7 +33,11 @@
 #include "tcmalloc/tracking.h"
 
 namespace tcmalloc {
-
+// record cpu local rate of alloc and dealloc
+struct CpuLocalRate{
+  std::atomic<int> alloc_times;
+  std::atomic<int> dealloc_times;
+};
 
 class CPUCache {
  public:
@@ -99,6 +103,20 @@ class CPUCache {
   // Report statistics
   void Print(TCMalloc_Printer *out) const;
   void PrintInPbtxt(PbtxtRegion *region) const;
+
+  // get per-cpu-stats using fuction from percpu_tcmalloc.h
+  CpuStats GetCpuStats(std::map<uint64_t,uint64_t> &hpMap);
+
+  CpuLocalRate* local_rate_;
+  // init local_rate_
+  void CpuLocalRateInit(int num_cpus){
+    local_rate_ = reinterpret_cast<CpuLocalRate *>(
+      Static::arena()->Alloc(sizeof(CpuLocalRate) * num_cpus));
+    for(int cpu=0; cpu<num_cpus; cpu++){
+      local_rate_[cpu].alloc_times.store(0, std::memory_order_relaxed);
+      local_rate_[cpu].dealloc_times.store(0, std::memory_order_relaxed);
+    }
+  }
 
  private:
   // Per-size-class freelist resizing info.
@@ -208,6 +226,8 @@ inline void *ABSL_ATTRIBUTE_ALWAYS_INLINE CPUCache::Allocate(size_t cl) {
       return ret;
     }
   };
+  int cpu = subtle::percpu::GetCurrentVirtualCpu();
+  local_rate_[cpu].alloc_times.fetch_add(1,std::memory_order_relaxed);
   return freelist_.Pop(cl, &Helper::Underflow);
 }
 
@@ -225,6 +245,8 @@ inline void ABSL_ATTRIBUTE_ALWAYS_INLINE CPUCache::Deallocate(void *ptr,
       return Static::cpu_cache()->Overflow(ptr, cl, cpu);
     }
   };
+  int cpu = subtle::percpu::GetCurrentVirtualCpu();
+  local_rate_[cpu].dealloc_times.fetch_add(1,std::memory_order_relaxed);
   freelist_.Push(cl, ptr, Helper::Overflow);
 }
 

@@ -105,7 +105,7 @@ cc_binary(
         "tcmalloc.cc",
         "tcmalloc.h",
     ],
-    copts = TCMALLOC_DEFAULT_COPTS,
+    copts = ["-g"]+TCMALLOC_DEFAULT_COPTS,
     linkstatic = 1,
     linkshared = 1,
     visibility = ["//visibility:public"],

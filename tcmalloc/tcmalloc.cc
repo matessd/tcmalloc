@@ -70,6 +70,11 @@
 #include <utility>
 #include <vector>
 
+#include <set>
+#include <thread>
+#include <chrono>
+#include <fstream>
+
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
 #include "absl/base/const_init.h"
@@ -136,6 +141,158 @@ using tcmalloc::StackTrace;
 using tcmalloc::StackTraceTable;
 using tcmalloc::Static;
 using tcmalloc::ThreadCache;
+using tcmalloc::CpuStats;
+using tcmalloc::CpuLocalRate;
+using tcmalloc::HugePage;
+using tcmalloc::HugePageAwareAllocator;
+
+// Stat Tracker is a singleton class which can be used to periodically get tcmalloc stat information
+// It spins up a std::thread and runs background task which periodically dumps the malloc stats into
+// a file.
+struct StatTracker {
+private:
+  static StatTracker* trackerInstance;
+  static std::string FILEPATH;
+  std::thread t;
+  static int fileCounter;
+  struct HugePageUtilize {
+    int existed_times; //exist for how many time points
+    double utilization; //average utilization
+    void Update(double new_util){
+      utilization = (utilization*existed_times + new_util)/(existed_times+1);
+      existed_times++;
+    }
+  };
+
+  // add new hugepages in hpMap to uMap
+  static void AddUtilizeElems(std::map<uint64_t,HugePageUtilize>& uMap, 
+    std::map<uint64_t,uint64_t>& hpMap){
+    for(auto &map: hpMap){
+      uint64_t hp_id = map.first;
+      if(uMap.find(hp_id)==uMap.end()) {
+        uMap[hp_id]=HugePageUtilize{0,0};
+      }
+    }
+  }
+
+  static void backgroundTask();
+
+  StatTracker() {
+    t = std::thread(backgroundTask);
+  }
+
+public:
+  static StatTracker* getInstace() {
+    if(!trackerInstance) trackerInstance = new StatTracker();
+    return trackerInstance;
+  }
+  ~StatTracker(){}
+};
+
+void StatTracker::backgroundTask() {
+  static const double MiB = 1048576.0;
+  // open file for dumping
+  std::ofstream hp_file, local_file;
+  hp_file.open("./local_huge_page.data");
+  local_file.open("./local_rate.data");
+  CHECK_CONDITION(hp_file.is_open());
+  CHECK_CONDITION(local_file.is_open());
+  int num_cpus = absl::base_internal::NumCPUs();
+  // store huge page utilization
+  std::map<uint64_t, HugePageUtilize>uMap;
+  uMap.clear();
+  // spin background 
+  while(1){
+    // cpu cache may be initialled lazily, so make sure cpu populated.
+    // otherwise program will stuck in somewhere
+    bool is_populated = true;
+    for (int cpu = 0; cpu < num_cpus; cpu++) {
+      if (!Static::cpu_cache()->HasPopulated(cpu)) {
+        is_populated = false;
+        break;
+      }
+    }
+    
+    if(is_populated) {
+      // open output file
+      std::string fileName = FILEPATH + std::to_string(fileCounter)+".txt";
+      std::ofstream file;
+      file.open(fileName);
+      CHECK_CONDITION(file.is_open());
+
+      // get and dump cpu local rate to local_file
+      CpuLocalRate *local_rate = Static::cpu_cache()->local_rate_;
+      for(int cpu = 0; cpu < num_cpus; cpu++){
+        int alloc_times = 0, dealloc_times = 0;
+        alloc_times = local_rate[cpu].alloc_times.exchange(0, std::memory_order_relaxed);
+        dealloc_times = local_rate[cpu].dealloc_times.exchange(0, std::memory_order_relaxed);
+        local_file<<cpu<<" "<<alloc_times<<" "<<dealloc_times<<std::endl;
+      }
+
+      // get related stats
+      std::string output = tcmalloc::MallocExtension::GetStats();
+      std::map<uint64_t, uint64_t> hpMap;
+      hpMap.clear();
+      CpuStats cpu_stats = Static::cpu_cache()->GetCpuStats(hpMap);
+
+      // dump overall stats of local huge pages
+      hp_file<<cpu_stats.bytes/MiB<<" "<<cpu_stats.hps*2<<std::endl;
+      file<<"Below is overall cpu stats."<<std::endl;
+      file<<"total bytes in cpu cache: "<<cpu_stats.bytes/MiB<<"(MiB)"<<std::endl;
+      file<<"bytes of unique huge pages in cpu cache: "<<cpu_stats.hps*2<<"(MiB)"<<std::endl;
+      file<<"-----------------------------------"<<std::endl;
+
+      // dump detail stats of traced huge pages
+      file<<"Below is detail stats of each huge page ever appeared in cpu cache."<<std::endl;
+      file<<"local hugepage addr"<<" | | "<<"cpu used bytes"\
+          <<" | | "<<"used pages/256(at this time)"<<" | | "\
+          <<"average utilization(during existed times)"<<std::endl;
+      AddUtilizeElems(uMap, hpMap); // add new elems in hpMap to uMap
+      for(auto &map: uMap){
+        void *hpAddr = reinterpret_cast<void*>(map.first<<tcmalloc::kHugePageShift);
+        size_t used_pages = HugePageAwareAllocator::UsedPagesOfHp(hpAddr);
+        // can't trace this hupge page, remove this hpAddr
+        if(used_pages == 0){
+          uMap.erase(map.first);
+          ASSERT(hpMap.find(map.first)==hpMap.end());
+          file<<"hpAddr "<<hpAddr<<" has been deleted"<<std::endl;
+          continue;
+        }
+
+        // output cpu cache coverage and average utilization
+        uint64_t cpu_used_bytes = 0;
+        if(hpMap.find(map.first)!=hpMap.end()){
+          cpu_used_bytes = hpMap[map.first];
+        }
+        file<<hpAddr<<"    "<<std::setiosflags(std::ios::fixed)<<\
+          cpu_used_bytes/MiB<<"(MiB)   "<<\
+          used_pages<<"/"<<256<<"   ";
+        map.second.Update((double)used_pages/256);
+        file<<map.second.utilization<<"(exists for "\
+          <<map.second.existed_times<<" times)"\
+          <<std::endl;
+      }
+      file<<"-----------------------------------"<<std::endl;
+      
+      // dump other stats
+      file<<output;
+
+      //output to see whether program stucked 
+      Log(kLog, __FILE__, __LINE__, "output:", fileCounter);
+
+      file.close();
+      fileCounter++;
+    }
+
+    //wait 5 seconds
+    std::this_thread::sleep_for(std::chrono::seconds(5U));
+  }
+  hp_file.close();
+  local_file.close();
+}
+StatTracker* StatTracker::trackerInstance = nullptr;
+std::string StatTracker::FILEPATH = "./output";
+int StatTracker::fileCounter = 0;
 
 // ----------------------- IMPLEMENTATION -------------------------------
 
@@ -782,7 +939,7 @@ extern "C" void MallocExtension_Internal_GetStats(std::string* ret) {
     // TODO(b/142931922):  printer only writes data and does not read it.
     // Leverage https://wg21.link/P1072 when it is standardized.
     ret->resize(size - 1);
-
+    
     size_t written_size = TCMalloc_Internal_GetStats(&*ret->begin(), size - 1);
     if (written_size < size - 1) {
       // We did not truncate.
@@ -2342,6 +2499,7 @@ class TCMallocGuard {
     TCMallocInternalFree(TCMallocInternalMalloc(1));
     ThreadCache::InitTSD();
     TCMallocInternalFree(TCMallocInternalMalloc(1));
+    StatTracker::getInstace();
   }
 };
 

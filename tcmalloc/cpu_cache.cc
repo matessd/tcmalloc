@@ -119,6 +119,7 @@ void CPUCache::Activate(ActivationMode mode) {
   int num_cpus = absl::base_internal::NumCPUs();
 
   absl::base_internal::SpinLockHolder h(&pageheap_lock);
+  CpuLocalRateInit(num_cpus);//temporary code, record local rate
 
   resize_ = reinterpret_cast<ResizeInfo *>(
       Static::arena()->Alloc(sizeof(ResizeInfo) * num_cpus));
@@ -611,6 +612,10 @@ uint32_t CPUCache::PerClassResizeInfo::Tick() {
   memcpy(&raw, &state, sizeof(raw));
   state_.store(raw, std::memory_order_relaxed);
   return state.quiescent_ticks - 1;
+}
+
+CpuStats CPUCache::GetCpuStats(std::map<uint64_t,uint64_t> &hpMap) {
+  return freelist_.GetSlabStats(hpMap);
 }
 
 static void ActivatePerCPUCaches() {

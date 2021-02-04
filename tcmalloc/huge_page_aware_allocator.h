@@ -96,6 +96,7 @@ class HugePageAwareAllocator : public PageAllocatorInterface {
   }
 
   const HugeCache* cache() const { return &cache_; }
+  static size_t UsedPagesOfHp(void *hpAddr);
 
  private:
   typedef HugePageFiller<PageTracker<SystemRelease>> FillerType;
