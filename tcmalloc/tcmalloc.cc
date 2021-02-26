@@ -165,12 +165,11 @@ private:
   };
 
   // add new hugepages in hpMap to uMap
-  static void AddUtilizeElems(std::map<uint64_t,HugePageUtilize>& uMap, 
-    std::map<uint64_t,uint64_t>& hpMap){
-    for(auto &map: hpMap){
-      uint64_t hp_id = map.first;
-      if(uMap.find(hp_id)==uMap.end()) {
-        uMap[hp_id]=HugePageUtilize{0,0};
+  static void AddUtilizeElems(std::map<uintptr_t,HugePageUtilize>& uMap, 
+    std::set<uintptr_t>& hpSet){
+    for(auto &elem: hpSet){
+      if(uMap.find(elem)==uMap.end()) {
+        uMap[elem]=HugePageUtilize{0,0};
       }
     }
   }
@@ -191,6 +190,9 @@ public:
 
 void StatTracker::backgroundTask() {
   static const double MiB = 1048576.0;
+  // set releaseRate, default is 0
+  tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
+     static_cast<tcmalloc::MallocExtension::BytesPerSecond>(MiB/2));
   // open file for dumping
   std::ofstream hp_file, local_file;
   hp_file.open("./local_huge_page.data");
@@ -199,7 +201,7 @@ void StatTracker::backgroundTask() {
   CHECK_CONDITION(local_file.is_open());
   int num_cpus = absl::base_internal::NumCPUs();
   // store huge page utilization
-  std::map<uint64_t, HugePageUtilize>uMap;
+  std::map<uintptr_t, HugePageUtilize>uMap;
   uMap.clear();
   // spin background 
   while(1){
@@ -231,7 +233,7 @@ void StatTracker::backgroundTask() {
 
       // get related stats
       std::string output = tcmalloc::MallocExtension::GetStats();
-      std::map<uint64_t, uint64_t> hpMap;
+      std::map<uintptr_t, size_t> hpMap;
       hpMap.clear();
       CpuStats cpu_stats = Static::cpu_cache()->GetCpuStats(hpMap);
 
@@ -243,33 +245,39 @@ void StatTracker::backgroundTask() {
       file<<"-----------------------------------"<<std::endl;
 
       // dump detail stats of traced huge pages
-      file<<"Below is detail stats of each huge page ever appeared in cpu cache."<<std::endl;
+      file<<"Below is stats of each huge page ever appeared in filler."<<std::endl;
       file<<"local hugepage addr"<<" | | "<<"cpu used bytes"\
           <<" | | "<<"used pages/256(at this time)"<<" | | "\
           <<"average utilization(during existed times)"<<std::endl;
-      AddUtilizeElems(uMap, hpMap); // add new elems in hpMap to uMap
-      for(auto &map: uMap){
-        void *hpAddr = reinterpret_cast<void*>(map.first<<tcmalloc::kHugePageShift);
+      std::set<uintptr_t>hpSet; hpSet.clear();
+      Static::page_allocator()->getHeapPages(hpSet);
+      AddUtilizeElems(uMap, hpSet); // add new elems in hpMap to uMap
+      for(auto it=uMap.begin(); it!=uMap.end(); it++){
+        uintptr_t hpId = it->first;
+        void *hpAddr = (void*)(hpId<<tcmalloc::kHugePageShift);
         size_t used_pages = HugePageAwareAllocator::UsedPagesOfHp(hpAddr);
         // can't trace this hupge page, remove this hpAddr
         if(used_pages == 0){
-          uMap.erase(map.first);
-          ASSERT(hpMap.find(map.first)==hpMap.end());
+          auto tmp_it = it; it++;
+          uMap.erase(tmp_it);
           file<<"hpAddr "<<hpAddr<<" has been deleted"<<std::endl;
+          if(it!=uMap.begin()){
+            it--;
+          }
           continue;
         }
 
         // output cpu cache coverage and average utilization
         uint64_t cpu_used_bytes = 0;
-        if(hpMap.find(map.first)!=hpMap.end()){
-          cpu_used_bytes = hpMap[map.first];
+        if(hpMap.find(it->first)!=hpMap.end()){
+          cpu_used_bytes = hpMap[it->first];
         }
         file<<hpAddr<<"    "<<std::setiosflags(std::ios::fixed)<<\
           cpu_used_bytes/MiB<<"(MiB)   "<<\
           used_pages<<"/"<<256<<"   ";
-        map.second.Update((double)used_pages/256);
-        file<<map.second.utilization<<"(exists for "\
-          <<map.second.existed_times<<" times)"\
+        it->second.Update((double)used_pages/256);
+        file<<it->second.utilization<<"(exists for "\
+          <<it->second.existed_times<<" times)"\
           <<std::endl;
       }
       file<<"-----------------------------------"<<std::endl;

@@ -105,7 +105,7 @@ class CPUCache {
   void PrintInPbtxt(PbtxtRegion *region) const;
 
   // get per-cpu-stats using fuction from percpu_tcmalloc.h
-  CpuStats GetCpuStats(std::map<uint64_t,uint64_t> &hpMap);
+  CpuStats GetCpuStats(std::map<uintptr_t,size_t> &hpMap);
 
   CpuLocalRate* local_rate_;
   // init local_rate_

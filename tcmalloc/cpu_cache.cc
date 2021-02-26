@@ -614,7 +614,7 @@ uint32_t CPUCache::PerClassResizeInfo::Tick() {
   return state.quiescent_ticks - 1;
 }
 
-CpuStats CPUCache::GetCpuStats(std::map<uint64_t,uint64_t> &hpMap) {
+CpuStats CPUCache::GetCpuStats(std::map<uintptr_t,size_t> &hpMap) {
   return freelist_.GetSlabStats(hpMap);
 }
 

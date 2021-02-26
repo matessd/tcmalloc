@@ -1,0 +1,16 @@
+2021.2.5-2021.2.25
+Make Progress:
+1. fix existed times count bug, it's because erase elements when traverse map STL.
+2. notice previous code only traces cpu cache once for 5 seconds, 
+   maybe some hugepages only have few objects, and quickly leave cpu cache, so we can't capture these hugepages.
+   Now trace by traverse huge_page_filler. 
+   The result is this only adds few hugepages, so it doesn't matter.
+3. test several tests. redis and phoronix-test.
+   redis proved that high frag of tcmalloc in high concurrent request, or maybe in quite random request.
+
+Problem:
+1. All tests of phoronix-test use little memory, like ai-benchmark, stream, cachebench.
+2. If there are free pages, they are either in huge_cache or in huge_page_filler, but why in huge_cache?
+   How does huge_cache work and how to traverse hugepages in it?
+3. Don't know how to use tcmalloc in CloudSuite.
+------------------------------------------ 

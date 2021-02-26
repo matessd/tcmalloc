@@ -30,7 +30,12 @@ run as follows, will auto compile using bazel and generate stats.
 
 ClassificationMLP, RegressionMLP, Neural_Network_Architecture are tensorflow test
 
-### C/C++ test
-./runcxx.sh cxx_test_dirctory (dir name like alloc_test)
+### bazel build C/C++ test
+./runBazel.sh cxx_test_dirctory (dir name like alloc_test)
 
 alloc_test, larson, rptest are C++ test
+
+### single test program
+./runPro.sh program_test_dirctory 
+
+directories: redis

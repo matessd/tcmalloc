@@ -32,6 +32,8 @@
 #include "tcmalloc/internal/timeseries_tracker.h"
 #include "tcmalloc/span.h"
 #include "tcmalloc/stats.h"
+//my
+#include <set>
 
 namespace tcmalloc {
 
@@ -839,6 +841,16 @@ class HugePageFiller {
   SubreleaseStats subrelease_stats() const { return subrelease_stats_; }
   void Print(TCMalloc_Printer *out, bool everything) const;
   void PrintInPbtxt(PbtxtRegion *hpaa) const;
+  void searchTList(std::set<uintptr_t>&hpSet){
+    auto loop = [&](const Tracker *pt) {
+      ASSERT(pt!=nullptr);
+      hpSet.insert(pt->location().index());
+    };
+    regular_alloc_.Iter(loop, 0);
+    donated_alloc_.Iter(loop, 0);
+    regular_alloc_partial_released_.Iter(loop, 0);
+    regular_alloc_released_.Iter(loop, 0);
+  }
 
  private:
   typedef TList<TrackerType> TrackerList;

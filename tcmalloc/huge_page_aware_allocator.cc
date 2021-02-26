@@ -646,4 +646,8 @@ size_t HugePageAwareAllocator::UsedPagesOfHp(void *hpAddr){
   }
 }
 
+void HugePageAwareAllocator::getHugePages(std::set<uintptr_t>&hpSet){
+  filler_.searchTList(hpSet);
+}
+
 }  // namespace tcmalloc

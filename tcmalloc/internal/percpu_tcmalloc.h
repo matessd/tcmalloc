@@ -917,7 +917,7 @@ PerCPUMetadataState TcmallocSlab<Shift, NumClasses>::MetadataMemoryUsage()
 //get stats from slab_
 template <size_t Shift, size_t NumClasses>
 inline CpuStats TcmallocSlab<Shift, NumClasses>::GetSlabStats( \
-    std::map<uint64_t,uint64_t> &hpMap) {
+    std::map<uintptr_t,size_t> &hpMap) {
   CpuStats cpu_stats; cpu_stats.bytes=0;
   for (int cpu = 0, num_cpus = absl::base_internal::NumCPUs(); \
     cpu < num_cpus; ++cpu) {
@@ -957,7 +957,7 @@ inline CpuStats TcmallocSlab<Shift, NumClasses>::GetSlabStats( \
         //Log(kLog, __FILE__, __LINE__, "memory location", item);
         auto hugePageAllign = (reinterpret_cast<uintptr_t>(item) >> kHugePageShift);
         uint64_t hpAddr = reinterpret_cast<uint64_t>(hugePageAllign);
-        hpMap[hpAddr] += size;
+        hpMap[hugePageAllign] += size;
       }
 
       // phase 3: recover origianl header
