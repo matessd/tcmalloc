@@ -164,12 +164,21 @@ private:
     }
   };
 
-  // add new hugepages in hpMap to uMap
+  // add new hugepages in hpSet to uMap
   static void AddUtilizeElems(std::map<uintptr_t,HugePageUtilize>& uMap, 
     std::set<uintptr_t>& hpSet){
     for(auto &elem: hpSet){
       if(uMap.find(elem)==uMap.end()) {
         uMap[elem]=HugePageUtilize{0,0};
+      }
+    }
+  }
+
+  static void AddUtilizeElems(std::map<uintptr_t,HugePageUtilize>& uMap, 
+    std::map<uintptr_t,size_t>& hpMap){
+    for(auto &it: hpMap){
+      if(uMap.find(it.first)==uMap.end()) {
+        uMap[it.first]=HugePageUtilize{0,0};
       }
     }
   }
@@ -250,11 +259,15 @@ void StatTracker::backgroundTask() {
           <<" | | "<<"used pages/256(at this time)"<<" | | "\
           <<"average utilization(during existed times)"<<std::endl;
       std::set<uintptr_t>hpSet; hpSet.clear();
-      Static::page_allocator()->getHeapPages(hpSet);
-      AddUtilizeElems(uMap, hpSet); // add new elems in hpMap to uMap
+      // get hugepages stats from pageHeap, now is hugepage filler
+      //Static::page_allocator()->getHeapPages(hpSet);
+      AddUtilizeElems(uMap, hpMap); // add new elems to uMap
+      //Log(kLog, __FILE__, __LINE__, hpMap.begin()->first, *hpSet.begin());
+      //Log(kLog, __FILE__, __LINE__, (void*)hpMap.begin()->first, (void*)*hpSet.begin());
       for(auto it=uMap.begin(); it!=uMap.end(); it++){
         uintptr_t hpId = it->first;
         void *hpAddr = (void*)(hpId<<tcmalloc::kHugePageShift);
+        //Log(kLog, __FILE__, __LINE__, hpAddr);
         size_t used_pages = HugePageAwareAllocator::UsedPagesOfHp(hpAddr);
         // can't trace this hupge page, remove this hpAddr
         if(used_pages == 0){

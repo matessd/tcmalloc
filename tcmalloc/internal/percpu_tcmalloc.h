@@ -950,13 +950,12 @@ inline CpuStats TcmallocSlab<Shift, NumClasses>::GetSlabStats( \
       uint16_t start = old.begin, cur = old.current;
       int size = Static::sizemap()->class_to_size(cl);
       cpu_stats.bytes += (cur-start)*size;
-      for(int ptr = start; ptr < cur; ptr++) {
+      for(int off = start; off < cur; off++) {
         //Log(kLog, __FILE__, __LINE__, "start,cur,ptr:", start,cur,ptr);
         void **elems = reinterpret_cast<void**>(slab);
-        void* item = elems[ptr];
+        void* item = elems[off];
         //Log(kLog, __FILE__, __LINE__, "memory location", item);
         auto hugePageAllign = (reinterpret_cast<uintptr_t>(item) >> kHugePageShift);
-        uint64_t hpAddr = reinterpret_cast<uint64_t>(hugePageAllign);
         hpMap[hugePageAllign] += size;
       }
 
