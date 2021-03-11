@@ -55,7 +55,7 @@
 #include "tcmalloc/testing/empirical_distributions.h"
 #include "tcmalloc/testing/testutil.h"
 
-ABSL_FLAG(std::string, profile, "",
+ABSL_FLAG(std::string, profile, "beta",
           "Which source of profiled allocation to use for the base load. "
           "This can be beta, bravo, charlie, echo, merced, sierra, sigma, or "
           "uniform. It can also be a uint64_t N, which means allocate N-byte "
@@ -63,9 +63,9 @@ ABSL_FLAG(std::string, profile, "",
 
 ABSL_FLAG(uint64_t, threads, 1, "Number of parallel allocators");
 
-ABSL_FLAG(uint64_t, bytes, 16ul << 30, "Total size of base heap");
+ABSL_FLAG(uint64_t, bytes, 16ul << 25, "Total size of base heap");
 
-ABSL_FLAG(uint64_t, transient_bytes, 0,
+ABSL_FLAG(uint64_t, transient_bytes, 1ul<<24,
           "Additional size of data allocated at program start, then freed "
           "before running main benchmark");
 
@@ -83,10 +83,10 @@ ABSL_FLAG(std::string, spike_profile, "",
           "has the same meaning. Otherwise must be the empty string, which "
           "means copy --profile.");
 
-ABSL_FLAG(absl::Duration, spike_rate, absl::Milliseconds(10),
+ABSL_FLAG(absl::Duration, spike_rate, absl::Milliseconds(1000),
           "1/QPS for spikes");
 
-ABSL_FLAG(absl::Duration, spike_lifetime, absl::Milliseconds(30),
+ABSL_FLAG(absl::Duration, spike_lifetime, absl::Milliseconds(2000),
           "Processing time for spikes");
 
 ABSL_FLAG(bool, spikes_exact, false,
@@ -97,16 +97,16 @@ ABSL_FLAG(bool, spikes_shared, false,
           "should spikes be split among threads equally (instead of on one "
           "chosen thread?)");
 
-ABSL_FLAG(double, spike_locality, 0.90,
+ABSL_FLAG(double, spike_locality, 0.50,
           "Probability a spike freed by the thread which created it");
 
 ABSL_FLAG(int64_t, simulated_bytes_per_sec, 0,
           "If non-0, empirical driver will simulate tick of "
           "ReleaseMemoryToOS iteration each given number of bytes allocated");
 
-ABSL_FLAG(bool, print_stats_to_file, true, "Write mallocz stats to a file");
+ABSL_FLAG(bool, print_stats_to_file, false, "Write mallocz stats to a file");
 
-ABSL_FLAG(int64_t, empirical_malloc_release_bytes_per_sec, 0,
+ABSL_FLAG(int64_t, empirical_malloc_release_bytes_per_sec, 1ul<<24,
           "Number of bytes to try to release from the page heap per second");
 
 namespace tcmalloc {

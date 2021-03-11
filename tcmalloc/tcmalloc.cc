@@ -231,14 +231,19 @@ void StatTracker::backgroundTask() {
       file.open(fileName);
       CHECK_CONDITION(file.is_open());
 
-      // get and dump cpu local rate to local_file
+      // get and dump cpu local rate
       CpuLocalRate *local_rate = Static::cpu_cache()->local_rate_;
+      file<<"Cpu alloc/dealloc during last interval."<<std::endl;
+      file<<"Cpu_id  Alloc/Dealloc:"<<std::endl;
       for(int cpu = 0; cpu < num_cpus; cpu++){
         int alloc_times = 0, dealloc_times = 0;
         alloc_times = local_rate[cpu].alloc_times.exchange(0, std::memory_order_relaxed);
         dealloc_times = local_rate[cpu].dealloc_times.exchange(0, std::memory_order_relaxed);
         local_file<<cpu<<" "<<alloc_times<<" "<<dealloc_times<<std::endl;
+        file<<cpu<<"       "<<alloc_times<<"/"<<dealloc_times<<"="\
+          <<(double)alloc_times/dealloc_times<<std::endl;
       }
+      file<<"-----------------------------------"<<std::endl;
 
       // get related stats
       std::string output = tcmalloc::MallocExtension::GetStats();
@@ -248,51 +253,43 @@ void StatTracker::backgroundTask() {
 
       // dump overall stats of local huge pages
       hp_file<<cpu_stats.bytes/MiB<<" "<<cpu_stats.hps*2<<std::endl;
-      file<<"Below is overall cpu stats."<<std::endl;
-      file<<"total bytes in cpu cache: "<<cpu_stats.bytes/MiB<<"(MiB)"<<std::endl;
-      file<<"bytes of unique huge pages in cpu cache: "<<cpu_stats.hps*2<<"(MiB)"<<std::endl;
+      file<<"Overall cpu stats."<<std::endl;
+      file<<"used bytes in cpu cache: "<<cpu_stats.bytes/MiB<<"(MiB)"<<std::endl;
+      file<<"used huge pages in cpu cache: "<<cpu_stats.hps*2<<"(MiB)"<<std::endl;
       file<<"-----------------------------------"<<std::endl;
 
-      // dump detail stats of traced huge pages
-      file<<"Below is stats of each huge page ever appeared in filler."<<std::endl;
-      file<<"local hugepage addr"<<" | | "<<"cpu used bytes"\
-          <<" | | "<<"used pages/256(at this time)"<<" | | "\
-          <<"average utilization(during existed times)"<<std::endl;
+      // dump overall stats of traced huge pages
+      file<<"Stats of huge pages ever appeared in cpu-cache."<<std::endl;
       std::set<uintptr_t>hpSet; hpSet.clear();
       // get hugepages stats from pageHeap, now is hugepage filler
       //Static::page_allocator()->getHeapPages(hpSet);
       AddUtilizeElems(uMap, hpMap); // add new elems to uMap
-      //Log(kLog, __FILE__, __LINE__, hpMap.begin()->first, *hpSet.begin());
-      //Log(kLog, __FILE__, __LINE__, (void*)hpMap.begin()->first, (void*)*hpSet.begin());
+      double all_used_pages=0, all_util=0;
+      size_t hp_cnt=0;
       for(auto it=uMap.begin(); it!=uMap.end(); it++){
         uintptr_t hpId = it->first;
         void *hpAddr = (void*)(hpId<<tcmalloc::kHugePageShift);
-        //Log(kLog, __FILE__, __LINE__, hpAddr);
         size_t used_pages = HugePageAwareAllocator::UsedPagesOfHp(hpAddr);
-        // can't trace this hupge page, remove this hpAddr
+        // can't trace this huge page, remove this hpAddr
         if(used_pages == 0){
           auto tmp_it = it; it++;
           uMap.erase(tmp_it);
-          file<<"hpAddr "<<hpAddr<<" has been deleted"<<std::endl;
           if(it!=uMap.begin()){
             it--;
           }
           continue;
         }
-
-        // output cpu cache coverage and average utilization
-        uint64_t cpu_used_bytes = 0;
-        if(hpMap.find(it->first)!=hpMap.end()){
-          cpu_used_bytes = hpMap[it->first];
-        }
-        file<<hpAddr<<"    "<<std::setiosflags(std::ios::fixed)<<\
-          cpu_used_bytes/MiB<<"(MiB)   "<<\
-          used_pages<<"/"<<256<<"   ";
+        hp_cnt++;
+        // sum coverage and utilization
         it->second.Update((double)used_pages/256);
-        file<<it->second.utilization<<"(exists for "\
-          <<it->second.existed_times<<" times)"\
-          <<std::endl;
+        all_used_pages += used_pages;
+        all_util += it->second.utilization;
       }
+      // average coverage and utilization
+      file<<"huge pages count: "<<hp_cnt<<std::endl;
+      file<<"average coverage: "<<all_used_pages/hp_cnt<<"/256="\
+          <<all_used_pages/hp_cnt/256<<std::endl;
+      file<<"average utilization: "<<all_util/hp_cnt<<std::endl;
       file<<"-----------------------------------"<<std::endl;
       
       // dump other stats
