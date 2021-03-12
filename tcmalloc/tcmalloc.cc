@@ -201,7 +201,7 @@ void StatTracker::backgroundTask() {
   static const double MiB = 1048576.0;
   // set releaseRate, default is 0
   tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
-     static_cast<tcmalloc::MallocExtension::BytesPerSecond>(MiB/2));
+     static_cast<tcmalloc::MallocExtension::BytesPerSecond>(64ul<<20));
   // open file for dumping
   std::ofstream hp_file, local_file;
   hp_file.open("./local_huge_page.data");
