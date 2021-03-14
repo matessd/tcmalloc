@@ -1,6 +1,5 @@
 # README
 Tensorflow tests come from https://github.com/whybfq/tensorflow2.git and https://github.com/YunYang1994/TensorFlow2.0-Examples
-https://github.com/Pandalzy/captcha_recognition
 
 C++ tests comes from  https://github.com/khanhtn1/malloc-benchmarks.
 
@@ -25,18 +24,4 @@ need compiler that supports C++17
 3. **outputxxx.txt** contains detail stats of hugepages in cpu cache.
 
 ## To test tcmalloc
-run as follows, will auto compile using bazel and generate stats.
-### tensorflow test
-./runpy.sh tensorflow_test_directory (dir name like ClassificationMLP)
-
-ClassificationMLP, RegressionMLP, Neural_Network_Architecture are tensorflow test
-
-### bazel build C/C++ test
-./runBazel.sh cxx_test_dirctory (dir name like alloc_test)
-
-alloc_test, larson, rptest are C++ test
-
-### single test program
-./runPro.sh program_test_dirctory 
-
-directories: redis
+./run.sh test_dirctory

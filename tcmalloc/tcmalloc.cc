@@ -153,7 +153,7 @@ struct StatTracker {
 private:
   static StatTracker* trackerInstance;
   static std::string FILEPATH;
-  std::thread t;
+  std::thread t1, t2;
   static int fileCounter;
   struct HugePageUtilize {
     int existed_times; //exist for how many time points
@@ -186,7 +186,13 @@ private:
   static void backgroundTask();
 
   StatTracker() {
-    t = std::thread(backgroundTask);
+    t1 = std::thread(backgroundTask);
+    // set releaseRate, default is 0
+    tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
+       static_cast<tcmalloc::MallocExtension::BytesPerSecond>(16ul<<20));
+    t2 = std::thread(tcmalloc::MallocExtension::ProcessBackgroundActions);
+    t1.detach();
+    t2.detach();
   }
 
 public:
@@ -199,9 +205,6 @@ public:
 
 void StatTracker::backgroundTask() {
   static const double MiB = 1048576.0;
-  // set releaseRate, default is 0
-  tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
-     static_cast<tcmalloc::MallocExtension::BytesPerSecond>(64ul<<20));
   // open file for dumping
   std::ofstream hp_file, local_file;
   hp_file.open("./local_huge_page.data");
@@ -229,7 +232,7 @@ void StatTracker::backgroundTask() {
       std::string fileName = FILEPATH + std::to_string(fileCounter)+".txt";
       std::ofstream file;
       file.open(fileName);
-      CHECK_CONDITION(file.is_open());
+      ASSERT(file.is_open());
 
       // get and dump cpu local rate
       CpuLocalRate *local_rate = Static::cpu_cache()->local_rate_;
@@ -1243,6 +1246,7 @@ extern "C" void MallocExtension_Internal_ReleaseMemoryToSystem(
   // that the app can periodically call ReleaseMemoryToSystem() to release
   // memory at a constant rate.
   ABSL_CONST_INIT static size_t extra_bytes_released;
+  ABSL_CONST_INIT static size_t sec_cnt;
 
   absl::base_internal::SpinLockHolder rh(&release_lock);
 

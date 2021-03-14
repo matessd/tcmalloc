@@ -6,9 +6,9 @@ if [ $? -eq 1 ]; then
 fi
 cd $1
 ../clean.sh
-needed=$(ls a.out redis-benchmark)
+needed=$(ls singletest.sh)
 if [ $? -ne 0 ]; then
-  echo "error c++ test directory"
+  echo "wrong test directory"
   exit 1
 fi
 ./singletest.sh

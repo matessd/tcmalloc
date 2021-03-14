@@ -9,9 +9,9 @@ export LD_LIBRARY_PATH=/home/sun/workspace/tcmalloc/bazel-bin/tcmalloc
 ./redis-server&
 PID=$!
 #echo -e "\033[31m$PID\033[0m"
-sleep 0.01
-./redis-benchmark -c 1000 -d 2000 -r 2000 -n 10000
+sleep 0.1
+./redis-benchmark -c 1000 -d 2000 -r 2000 -n 10000>/dev/null
 ./redis-benchmark -c 100 -n 20000
-sleep 62
+sleep 42
 kill -9 $PID
 rm dump.rdb
