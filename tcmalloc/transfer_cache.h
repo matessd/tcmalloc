@@ -95,6 +95,14 @@ class TransferCacheManager {
       return cache_[size_class].legacy.central_length();
   }
 
+  // Sun: release related central freelist spans
+  void ReleaseCentral(int size_class) {
+    if (use_lock_free_cache_)
+      return cache_[size_class].lock_free.ReleaseCentral();
+    else
+      return cache_[size_class].legacy.ReleaseCentral();
+  }
+
   size_t tc_length(int size_class) {
     if (use_lock_free_cache_)
       return cache_[size_class].lock_free.tc_length();

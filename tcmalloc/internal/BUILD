@@ -113,6 +113,19 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "sorted_list",
+    hdrs = ["sorted_list.h"],
+    copts = TCMALLOC_DEFAULT_COPTS,
+    visibility = [
+        "//tcmalloc:__subpackages__",
+    ],
+    deps = [
+        "//tcmalloc/internal:logging",
+        "@com_google_absl//absl/base:core_headers",
+    ],
+)
+
 cc_test(
     name = "linked_list_test",
     size = "small",

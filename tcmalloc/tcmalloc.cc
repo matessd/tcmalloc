@@ -74,6 +74,7 @@
 #include <thread>
 #include <chrono>
 #include <fstream>
+#include <iostream>
 
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
@@ -164,6 +165,16 @@ private:
     }
   };
 
+  StatTracker() {
+    t1 = std::thread(backgroundTask);
+    // set releaseRate, default is 0
+    tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
+       static_cast<tcmalloc::MallocExtension::BytesPerSecond>(1ul<<20));
+    t2 = std::thread(tcmalloc::MallocExtension::ProcessBackgroundActions);
+    t1.detach();
+    t2.detach();
+  }
+
   // add new hugepages in hpSet to uMap
   static void AddUtilizeElems(std::map<uintptr_t,HugePageUtilize>& uMap, 
     std::set<uintptr_t>& hpSet){
@@ -185,14 +196,10 @@ private:
 
   static void backgroundTask();
 
-  StatTracker() {
-    t1 = std::thread(backgroundTask);
-    // set releaseRate, default is 0
-    tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
-       static_cast<tcmalloc::MallocExtension::BytesPerSecond>(16ul<<20));
-    t2 = std::thread(tcmalloc::MallocExtension::ProcessBackgroundActions);
-    t1.detach();
-    t2.detach();
+  static void ReleaseCentralSpans(){
+    for (int cl = 0; cl < kNumClasses; ++cl) {
+      Static::transfer_cache().ReleaseCentral(cl);
+    }
   }
 
 public:
@@ -209,8 +216,7 @@ void StatTracker::backgroundTask() {
   std::ofstream hp_file, local_file;
   hp_file.open("./local_huge_page.data");
   local_file.open("./local_rate.data");
-  CHECK_CONDITION(hp_file.is_open());
-  CHECK_CONDITION(local_file.is_open());
+  CHECK_CONDITION(hp_file.is_open() && local_file.is_open());
   int num_cpus = absl::base_internal::NumCPUs();
   // store huge page utilization
   std::map<uintptr_t, HugePageUtilize>uMap;
@@ -231,8 +237,15 @@ void StatTracker::backgroundTask() {
       // open output file
       std::string fileName = FILEPATH + std::to_string(fileCounter)+".txt";
       std::ofstream file;
-      file.open(fileName);
-      ASSERT(file.is_open());
+      file.open(fileName, std::ios::out);
+      if(file.is_open()==0){
+        std::cerr << "open failure: " << std::strerror(errno) << '\n';
+        ASSERT(0);
+      }
+
+      if(fileCounter>=16){
+        ReleaseCentralSpans();
+      }
 
       // get and dump cpu local rate
       CpuLocalRate *local_rate = Static::cpu_cache()->local_rate_;
@@ -265,7 +278,10 @@ void StatTracker::backgroundTask() {
       file<<"Stats of huge pages ever appeared in cpu-cache."<<std::endl;
       std::set<uintptr_t>hpSet; hpSet.clear();
       // get hugepages stats from pageHeap, now is hugepage filler
+      //{
+      //absl::base_internal::SpinLockHolder h(&pageheap_lock);
       //Static::page_allocator()->getHeapPages(hpSet);
+      //}
       AddUtilizeElems(uMap, hpMap); // add new elems to uMap
       double all_used_pages=0, all_util=0;
       size_t hp_cnt=0;

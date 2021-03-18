@@ -246,6 +246,11 @@ class TransferCache {
   // Returns the number of free objects in the central cache.
   size_t central_length() { return freelist().length(); }
 
+  // Sun: release related central freelist spans
+  void ReleaseCentral() {
+    freelist().ReleaseSpans();
+  }
+
   // Returns the number of free objects in the transfer cache.
   size_t tc_length() {
     return static_cast<size_t>(slot_info_.load(std::memory_order_relaxed).used);
@@ -606,6 +611,11 @@ class LockFreeTransferCache {
 
   // Returns the number of free objects in the central cache.
   size_t central_length() { return freelist_.length(); }
+
+  // Sun: release related central freelist spans
+  void ReleaseCentral() {
+    freelist_.ReleaseSpans();
+  }
 
   // Returns the number of free objects in the transfer cache.
   size_t tc_length() const {

@@ -27,6 +27,8 @@
 #include "tcmalloc/span.h"
 #include "tcmalloc/span_stats.h"
 
+#include "tcmalloc/internal/sorted_list.h"
+
 namespace tcmalloc {
 
 // Data kept per size-class in central cache.
@@ -68,6 +70,9 @@ class CentralFreeList {
   size_t size_class() const {
     return size_class_;
   }
+
+  // Sun: release all free spans to page heap
+  void ReleaseSpans() ABSL_LOCKS_EXCLUDED(lock_);
 
   SpanStats GetSpanStats() const;
 
@@ -123,6 +128,7 @@ class CentralFreeList {
   tcmalloc_internal::StatsCounter num_spans_returned_;
 
   // Dummy header for non-empty spans
+  // Sun: means span in it still has free objects
   SpanList nonempty_ ABSL_GUARDED_BY(lock_);
 };
 

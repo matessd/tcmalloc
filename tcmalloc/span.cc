@@ -171,8 +171,12 @@ Span::ObjIdx* Span::IdxToPtr(ObjIdx idx, size_t size) const {
 
 bool Span::FreelistPush(void* ptr, size_t size) {
   ASSERT(allocated_ > 0);
-  if (allocated_ == 1) {
+  /*if (allocated_ == 1) {
     return false;
+  }*/
+  bool ret = true;
+  if (allocated_ == 1) {
+    ret=false;
   }
   allocated_--;
 
@@ -204,7 +208,8 @@ bool Span::FreelistPush(void* ptr, size_t size) {
     freelist_ = idx;
     embed_count_ = 0;
   }
-  return true;
+  //return true;
+  return ret;
 }
 
 size_t Span::FreelistPopBatch(void** __restrict batch, size_t N, size_t size) {

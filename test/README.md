@@ -1,8 +1,6 @@
 # README
 Tensorflow tests come from https://github.com/whybfq/tensorflow2.git and https://github.com/YunYang1994/TensorFlow2.0-Examples
 
-C++ tests comes from  https://github.com/khanhtn1/malloc-benchmarks.
-
 Tests have been modified a little.
 
 ## Plateform
@@ -25,3 +23,9 @@ need compiler that supports C++17
 
 ## To test tcmalloc
 ./run.sh test_dirctory
+
+## Something important
+
+1. firefox:
+   1.  build with --disable-jemalloc(replace malloc) and --disable-sandbox(sandbox will prevent write file). 
+   2. In **about:config** page, set browser.tabs.remote.autostart = false so that firefox run single-process mode. Otherwise in multi-process mode, multiple tcmalloc instances will be created.

@@ -27,6 +27,8 @@
 #include "tcmalloc/internal/logging.h"
 #include "tcmalloc/pages.h"
 
+#include "tcmalloc/internal/sorted_list.h"
+
 namespace tcmalloc {
 
 // Information kept for a span (a contiguous run of pages).
@@ -51,7 +53,9 @@ namespace tcmalloc {
 //    and is on returned PageHeap list.
 //    location_ == ON_RETURNED_FREELIST.
 class Span;
-typedef TList<Span> SpanList;
+//typedef TList<Span> SpanList;
+class SpanGreaterCmp;
+typedef TSortedList<Span, SpanGreaterCmp> SpanList;
 
 class Span : public SpanList::Elem {
  public:
@@ -148,7 +152,11 @@ class Span : public SpanList::Elem {
   // ---------------------------------------------------------------------------
 
   // Span freelist is empty?
+  // Sun: Means all obejects of Span be in use
   bool FreelistEmpty() const;
+
+  // Sun: Is all objects back to this span?
+  bool IsTotalFree() const;
 
   // Pushes ptr onto freelist unless the freelist becomes full,
   // in which case just return false.
@@ -332,6 +340,10 @@ inline bool Span::FreelistEmpty() const {
   return cache_size_ == 0 && freelist_ == kListEnd;
 }
 
+inline bool Span::IsTotalFree() const {
+  return allocated_ == 0;
+}
+
 inline void Span::RemoveFromList() { SpanList::Elem::remove(); }
 
 inline void Span::Prefetch() {
@@ -366,6 +378,13 @@ inline void Span::Init(PageId p, Length n) {
   location_ = IN_USE;
   sampled_ = 0;
 }
+
+class SpanGreaterCmp{
+ public:
+  bool operator()(Span *x, Span *y) const{
+    return x->first_page() > y->first_page();
+  }
+};
 
 }  // namespace tcmalloc
 

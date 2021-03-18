@@ -41,13 +41,14 @@ static Span* MapObjectToSpan(void* object) {
 
 Span* CentralFreeList::ReleaseToSpans(void* object, Span* span) {
   if (span->FreelistEmpty()) {
-    nonempty_.prepend(span);
+    //nonempty_.prepend(span);
+    nonempty_.insert(span);
   }
 
   if (span->FreelistPush(object, object_size_)) {
     return nullptr;
   }
-  span->RemoveFromList();  // from nonempty_
+  //span->RemoveFromList();  // from nonempty_
   return span;
 }
 
@@ -73,11 +74,23 @@ void CentralFreeList::InsertRange(void** batch, int N) {
     for (int i = 0; i < N; ++i) {
       Span* span = ReleaseToSpans(batch[i], spans[i]);
       if (span) {
-        free_spans[free_count] = span;
-        free_count++;
+        //free_spans[free_count] = span;
+        //free_count++;
+        ASSERT(span->IsTotalFree());
       }
     }
-    RecordMultiSpansDeallocated(free_count);
+    /*Span * cur = nonempty_.last();
+    ASSERT(!nonempty_.empty());
+    while(cur->IsTotalFree() && free_count<kMaxObjectsToMove){
+      free_spans[free_count] = cur;
+      free_count++; 
+      cur->RemoveFromList();
+      cur = nonempty_.last();
+      if(nonempty_.empty()){
+        break;
+      }
+    }
+    RecordMultiSpansDeallocated(free_count);*/
     UpdateObjectCounts(N);
   }
 
@@ -132,7 +145,8 @@ void CentralFreeList::Populate() ABSL_NO_THREAD_SAFETY_ANALYSIS {
 
   // Add span to list of non-empty spans
   lock_.Lock();
-  nonempty_.prepend(span);
+  //nonempty_.prepend(span);
+  nonempty_.insert(span);
   RecordSpanAllocated();
 }
 
@@ -142,6 +156,55 @@ size_t CentralFreeList::OverheadBytes() {
   }
   const size_t overhead_per_span = pages_per_span_.in_bytes() % object_size_;
   return num_spans() * overhead_per_span;
+}
+
+void CentralFreeList::ReleaseSpans() {
+  int kSize = kMaxObjectsToMove;
+  Span* free_spans[kSize*10];
+  int free_count = 0;
+  // prune rare objects case to avoid lock
+  if(length()<10||nonempty_.last()==nonempty_.first()){
+    return;
+  }
+  ASSERT(!nonempty_.empty());
+  lock_.Lock();
+  Span *prev = (Span*)NULL, *cur = nonempty_.last();
+  auto iter = nonempty_.at(cur);
+  bool flg = true;
+  ASSERT(cur!=nonempty_.first());
+  while(flg){
+    free_count = 0;
+    while(free_count<kSize && cur!=nonempty_.first()){
+      if(cur->IsTotalFree()){
+        free_spans[free_count] = cur;
+        free_count++;
+        prev = *(--iter);
+        ASSERT(cur->first_page()>prev->first_page());
+        //Log(kLog, __FILE__, __LINE__, cur->first_page().index(), prev->first_page().index());
+        cur->RemoveFromList();
+        cur = prev;
+      }else{
+        cur = *(--iter);
+      }
+      if(cur==nonempty_.first()){
+        flg = false;
+        break;
+      }
+    }
+    RecordMultiSpansDeallocated(free_count);
+    // Then, release all free spans into page heap under its mutex.
+    if (free_count) {
+      absl::base_internal::SpinLockHolder h(&pageheap_lock);
+      for (int i = 0; i < free_count; ++i) {
+        ASSERT(!IsTaggedMemory(free_spans[i]->start_address()));
+        Static::pagemap()->UnregisterSizeClass(free_spans[i]);
+        Static::page_allocator()->Delete(free_spans[i], /*tagged=*/false);
+      }
+    }
+  }
+  lock_.Unlock();
+  //Log(kLog, __FILE__, __LINE__, object_size_, length()/objects_per_span_);
+  return;
 }
 
 SpanStats CentralFreeList::GetSpanStats() const {

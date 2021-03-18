@@ -1,3 +1,3 @@
 #!/bin/bash
-pid=$(pgrep tcmalloc)
+pid=$(pgrep $1)
 kill -9 $pid
