@@ -88,8 +88,7 @@ class PageAllocator {
   const PageAllocInfo& info(bool tagged) const
       ABSL_EXCLUSIVE_LOCKS_REQUIRED(pageheap_lock);
   
-  void getHeapPages(std::set<uintptr_t>&hpSet) 
-      ABSL_EXCLUSIVE_LOCKS_REQUIRED(pageheap_lock);
+  void getHugePages(uintptr_t *array, int &offset, int max_size);
 
   enum Algorithm {
     PAGE_HEAP = 0,
@@ -199,11 +198,11 @@ inline const PageAllocInfo& PageAllocator::info(bool tagged) const {
   return impl(tagged)->info();
 }
 
-inline void PageAllocator::getHeapPages(std::set<uintptr_t>&hpSet){
+inline void PageAllocator::getHugePages(uintptr_t *array, int &offset, int max_size){
   HugePageAwareAllocator* tmp_impl =  (HugePageAwareAllocator*)impl(true);
-  tmp_impl->getHugePages(hpSet);
+  tmp_impl->getHugePages(array, offset, max_size);
   tmp_impl =  (HugePageAwareAllocator*)impl(false);
-  tmp_impl->getHugePages(hpSet);
+  tmp_impl->getHugePages(array, offset, max_size);
 }
 
 }  // namespace tcmalloc

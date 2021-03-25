@@ -57,11 +57,12 @@ struct PerCPUMetadataState {
   size_t resident_size;
 };
 
-// record some information in cpu-cache, like about hugepage coverage info  
+// sun: record some information in cpu-cache, like about hugepage coverage info  
 struct CpuStats{
   size_t hps;    //number of hugepages
   size_t bytes;  //bytes of objects
 };
+typedef std::map<uintptr_t,size_t> HpMap;
 
 namespace subtle {
 namespace percpu {
@@ -150,8 +151,8 @@ class TcmallocSlab {
 
   PerCPUMetadataState MetadataMemoryUsage() const;
 
-  // get stats of each slab, like hugepage info
-  CpuStats GetSlabStats(std::map<uint64_t,uint64_t> &hpMap);
+  // sun: get stats of each slab, like hugepage info
+  void GetSlabStats(HpMap &hpMap, CpuStats &cpu_stats, int cpu);
 
   // We use a single continuous region of memory for all slabs on all CPUs.
   // This region is split into NumCPUs regions of size kPerCpuMem (256k).
@@ -916,62 +917,58 @@ PerCPUMetadataState TcmallocSlab<Shift, NumClasses>::MetadataMemoryUsage()
 
 //get stats from slab_
 template <size_t Shift, size_t NumClasses>
-inline CpuStats TcmallocSlab<Shift, NumClasses>::GetSlabStats( \
-    std::map<uintptr_t,size_t> &hpMap) {
-  CpuStats cpu_stats; cpu_stats.bytes=0;
-  for (int cpu = 0, num_cpus = absl::base_internal::NumCPUs(); \
-    cpu < num_cpus; ++cpu) {
-    Slabs* slab = &slabs_[cpu];
-    for(size_t cl=0; cl < NumClasses; ++cl) {
-      std::atomic<int64_t>* hdrp = GetHeader(cpu, cl);
-      Header old = LoadHeader(hdrp);
-      if (old.IsLocked()) {// locked
-        Log(kLog, __FILE__, __LINE__, "Locked:cpu & cl ",cpu, cl);
-        //cl--;
-        continue;
-      }
-      if (old.begin==old.current){//no object
-        continue;
-      }
-      // phase 1: need to lock header first
-      /*Header hdr = old; hdr.Lock();
-      // swap may fail, so check the value of ret
-      const int ret1 = CompareAndSwapHeader(cpu, hdrp, old, hdr);
-      if (ret1 == cpu) {
-        Log(kLog, __FILE__, __LINE__, "lock sucesss");
-      } else if (ret1 >= 0) {
-        //Log(kLog, __FILE__, __LINE__, "lock fail or on different cpu");
-        cl--;
-        continue;
-      }
-      CHECK_CONDITION(LoadHeader(hdrp).IsLocked());*/
-
-      // phase 2: collect status
-      uint16_t start = old.begin, cur = old.current;
-      int size = Static::sizemap()->class_to_size(cl);
-      cpu_stats.bytes += (cur-start)*size;
-      for(int off = start; off < cur; off++) {
-        //Log(kLog, __FILE__, __LINE__, "start,cur,ptr:", start,cur,ptr);
-        void **elems = reinterpret_cast<void**>(slab);
-        void* item = elems[off];
-        //Log(kLog, __FILE__, __LINE__, "memory location", item);
-        auto hugePageAllign = (reinterpret_cast<uintptr_t>(item) >> kHugePageShift);
-        hpMap[hugePageAllign] += size;
-      }
-
-      // phase 3: recover origianl header
-      /*CHECK_CONDITION(LoadHeader(hdrp).IsLocked());
-      while(true){
-        const int ret2 = CompareAndSwapHeader(cpu, hdrp, hdr, old);
-        if(ret2==cpu){
-          Log(kLog, __FILE__, __LINE__, "restore ok");
-          break;
-        }
-      }*/
+inline void TcmallocSlab<Shift, NumClasses>::GetSlabStats( HpMap &hpMap,\
+   CpuStats &cpu_stats, int cpu) {
+  Slabs* slab = &slabs_[cpu];
+  for(size_t cl=0; cl < NumClasses; ++cl) {
+    std::atomic<int64_t>* hdrp = GetHeader(cpu, cl);
+    Header old = LoadHeader(hdrp);
+    if (old.IsLocked()) {// locked
+      Log(kLog, __FILE__, __LINE__, "Locked:cpu & cl ",cpu, cl);
+      //cl--;
+      continue;
     }
+    if (old.begin==old.current){//no object
+      continue;
+    }
+    // phase 1: need to lock header first
+    /*Header hdr = old; hdr.Lock();
+    // swap may fail, so check the value of ret
+    const int ret1 = CompareAndSwapHeader(cpu, hdrp, old, hdr);
+    if (ret1 == cpu) {
+      Log(kLog, __FILE__, __LINE__, "lock sucesss");
+    } else if (ret1 >= 0) {
+      //Log(kLog, __FILE__, __LINE__, "lock fail or on different cpu");
+      cl--;
+      continue;
+    }
+    CHECK_CONDITION(LoadHeader(hdrp).IsLocked());*/
+
+    // phase 2: collect status
+    uint16_t start = old.begin, cur = old.current;
+    int size = Static::sizemap()->class_to_size(cl);
+    cpu_stats.bytes += (cur-start)*size;
+    for(int off = start; off < cur; off++) {
+      //Log(kLog, __FILE__, __LINE__, "start,cur,ptr:", start,cur,ptr);
+      void **elems = reinterpret_cast<void**>(slab);
+      void* item = elems[off];
+      //Log(kLog, __FILE__, __LINE__, "memory location", item);
+      auto hugePageAllign = (reinterpret_cast<uintptr_t>(item) >> kHugePageShift);
+      hpMap[hugePageAllign] += size;
+    }
+
+    // phase 3: recover origianl header
+    /*CHECK_CONDITION(LoadHeader(hdrp).IsLocked());
+    while(true){
+      const int ret2 = CompareAndSwapHeader(cpu, hdrp, hdr, old);
+      if(ret2==cpu){
+        Log(kLog, __FILE__, __LINE__, "restore ok");
+        break;
+      }
+    }*/
   }
   cpu_stats.hps = hpMap.size();
-  return cpu_stats;
+  return;
 }
 
 }  // namespace percpu

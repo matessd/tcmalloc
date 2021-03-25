@@ -63,9 +63,9 @@ ABSL_FLAG(std::string, profile, "beta",
 
 ABSL_FLAG(uint64_t, threads, 1, "Number of parallel allocators");
 
-ABSL_FLAG(uint64_t, bytes, 16ul << 25, "Total size of base heap");
+ABSL_FLAG(uint64_t, bytes, 16ul << 20, "Total size of base heap");
 
-ABSL_FLAG(uint64_t, transient_bytes, 1ul<<24,
+ABSL_FLAG(uint64_t, transient_bytes, 0,
           "Additional size of data allocated at program start, then freed "
           "before running main benchmark");
 
@@ -106,7 +106,7 @@ ABSL_FLAG(int64_t, simulated_bytes_per_sec, 0,
 
 ABSL_FLAG(bool, print_stats_to_file, false, "Write mallocz stats to a file");
 
-ABSL_FLAG(int64_t, empirical_malloc_release_bytes_per_sec, 1ul<<24,
+ABSL_FLAG(int64_t, empirical_malloc_release_bytes_per_sec, 4ul<<20,
           "Number of bytes to try to release from the page heap per second");
 
 namespace tcmalloc {

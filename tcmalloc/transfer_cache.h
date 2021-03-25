@@ -185,6 +185,11 @@ class TransferCacheManager {
     return freelist_[size_class].RemoveRange(batch, n);
   }
 
+  // Sun: release related central freelist spans
+  void ReleaseCentral(int size_class) {
+    return freelist_[size_class].ReleaseSpans();
+  }
+
   size_t central_length(int size_class) {
     return freelist_[size_class].length();
   }

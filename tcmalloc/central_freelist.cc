@@ -85,10 +85,10 @@ void CentralFreeList::InsertRange(void** batch, int N) {
       free_spans[free_count] = cur;
       free_count++; 
       cur->RemoveFromList();
-      cur = nonempty_.last();
       if(nonempty_.empty()){
         break;
       }
+      cur = nonempty_.last();
     }
     RecordMultiSpansDeallocated(free_count);*/
     UpdateObjectCounts(N);

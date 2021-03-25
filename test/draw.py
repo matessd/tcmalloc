@@ -13,7 +13,13 @@ def draw_local_hp():
       x_data.append(x)
       x=x+1
     #print(x_data,y1_data,y2_data)
-    y_data = [y1/y2 for y1,y2 in zip(y1_data,y2_data)]
+    y_data=[]
+    for y1,y2 in zip(y1_data,y2_data):
+      if y2==0:
+        y_data.append(0)
+      else :
+        y_data.append(y1/y2)
+    #y_data = [y1/y2 for y1,y2 in zip(y1_data,y2_data)]
     plt.figure(figsize=(20, 10), dpi=80)
     plt.plot(x_data, y_data, label='upper: bytes in cpu cache bytes(MiB)\
       \nlower: bytes of unique hugepages(MiB)')

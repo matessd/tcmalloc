@@ -32,10 +32,13 @@
 #include "tcmalloc/internal/timeseries_tracker.h"
 #include "tcmalloc/span.h"
 #include "tcmalloc/stats.h"
-//my
+//sun:
 #include <set>
 
 namespace tcmalloc {
+
+// sun:
+typedef std::set<uintptr_t> HpSet;
 
 // Tracks correctness of skipped subrelease decisions over time.
 template <size_t kEpochs = 16>
@@ -841,10 +844,15 @@ class HugePageFiller {
   SubreleaseStats subrelease_stats() const { return subrelease_stats_; }
   void Print(TCMalloc_Printer *out, bool everything) const;
   void PrintInPbtxt(PbtxtRegion *hpaa) const;
-  void searchTList(std::set<uintptr_t>&hpSet){
+  void searchTList(uintptr_t *array, int &offset, int max_size){
     auto loop = [&](const Tracker *pt) {
       ASSERT(pt!=nullptr);
-      hpSet.insert(pt->location().index());
+      if(offset<max_size){
+        array[offset] = pt->location().index();
+        offset++;
+      }else{
+        offset = max_size+1;
+      }
     };
     regular_alloc_.Iter(loop, 0);
     donated_alloc_.Iter(loop, 0);

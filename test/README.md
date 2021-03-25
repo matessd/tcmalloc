@@ -28,4 +28,7 @@ need compiler that supports C++17
 
 1. firefox:
    1.  build with --disable-jemalloc(replace malloc) and --disable-sandbox(sandbox will prevent write file). 
-   2. In **about:config** page, set browser.tabs.remote.autostart = false so that firefox run single-process mode. Otherwise in multi-process mode, multiple tcmalloc instances will be created.
+   2. In **about:config** page, set browser.tabs.remote.autostart = false so that firefox run single-process mode. Otherwise in multi-process mode, multiple tcmalloc instances will be created.(and dom.ipc.processcount=0, but still a socket process)
+
+2. about sort central freelist:
+   1. cpu on, then 0.07-0.1 coverage at last(200 hps); cpu off, then transfer off, 0.27-0.3 coverage

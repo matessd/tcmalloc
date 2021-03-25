@@ -31,6 +31,7 @@
 #include "tcmalloc/static_vars.h"
 #include "tcmalloc/thread_cache.h"
 #include "tcmalloc/tracking.h"
+#include "tcmalloc/transfer_cache.h"
 
 namespace tcmalloc {
 // record cpu local rate of alloc and dealloc
@@ -105,8 +106,9 @@ class CPUCache {
   void PrintInPbtxt(PbtxtRegion *region) const;
 
   // get per-cpu-stats using fuction from percpu_tcmalloc.h
-  CpuStats GetCpuStats(std::map<uintptr_t,size_t> &hpMap);
+  CpuStats GetCpuStats(HpMap &hpMap);
 
+  // used for recording rate of alloc/dealloc
   CpuLocalRate* local_rate_;
   // init local_rate_
   void CpuLocalRateInit(int num_cpus){
@@ -228,6 +230,10 @@ inline void *ABSL_ATTRIBUTE_ALWAYS_INLINE CPUCache::Allocate(size_t cl) {
   };
   int cpu = subtle::percpu::GetCurrentVirtualCpu();
   local_rate_[cpu].alloc_times.fetch_add(1,std::memory_order_relaxed);
+  // sun: test
+  /*void* batch[1];
+  Static::transfer_cache().RemoveRange(cl, batch, 1);
+  return batch[0];*/
   return freelist_.Pop(cl, &Helper::Underflow);
 }
 
@@ -247,6 +253,10 @@ inline void ABSL_ATTRIBUTE_ALWAYS_INLINE CPUCache::Deallocate(void *ptr,
   };
   int cpu = subtle::percpu::GetCurrentVirtualCpu();
   local_rate_[cpu].dealloc_times.fetch_add(1,std::memory_order_relaxed);
+  // sun: test
+  /*void *batch[1];
+  batch[0]=ptr;
+  Static::transfer_cache().InsertRange(cl, absl::Span<void *>(batch), 1);*/
   freelist_.Push(cl, ptr, Helper::Overflow);
 }
 

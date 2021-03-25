@@ -614,8 +614,20 @@ uint32_t CPUCache::PerClassResizeInfo::Tick() {
   return state.quiescent_ticks - 1;
 }
 
-CpuStats CPUCache::GetCpuStats(std::map<uintptr_t,size_t> &hpMap) {
-  return freelist_.GetSlabStats(hpMap);
+CpuStats CPUCache::GetCpuStats(HpMap &hpMap) {
+  hpMap.clear();
+  CpuStats cpu_stats = CpuStats{0,0};
+  int num_cpus = absl::base_internal::NumCPUs();
+  for (int cpu = 0; cpu < num_cpus; cpu++) {
+    // cpu cache may be initialled lazily, it will indeed have max_size or
+    // other properties when it is been UpdateCapacity()
+    if (!HasPopulated(cpu)) {
+      Log(kLog, __FILE__, __LINE__, "CPU NOT POPULATED: ", cpu);
+      continue;
+    }
+    freelist_.GetSlabStats(hpMap, cpu_stats, cpu);
+  }
+  return cpu_stats;
 }
 
 static void ActivatePerCPUCaches() {
