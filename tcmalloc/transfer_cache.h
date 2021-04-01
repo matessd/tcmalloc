@@ -36,7 +36,8 @@
 
 namespace tcmalloc {
 
-#ifndef TCMALLOC_SMALL_BUT_SLOW
+//#ifndef TCMALLOC_SMALL_BUT_SLOW
+#if (!defined TCMALLOC_SMALL_BUT_SLOW) && (!defined TCMALLOC_LOW_ADDRESS_FIRST)
 
 class TransferCacheManager {
   template <typename CentralFreeList, typename Manager>

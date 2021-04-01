@@ -220,10 +220,17 @@ inline size_t RangeTracker<N>::FindAndMark(size_t n) {
       second_len = len;
     }
 
+  #ifndef TCMALLOC_LOW_ADDRESS_FIRST
     if (len >= n && len < best_len) {
       best_index = index;
       best_len = len;
     }
+  #else
+    if (len >= n && index < best_index) {
+      best_index = index;
+      best_len = len;
+    }
+  #endif
 
     index += len;
   }

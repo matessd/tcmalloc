@@ -45,9 +45,15 @@ HugeAddressMap::Node *HugeAllocator::Find(HugeLength n) {
   HugeAddressMap::Node *best = nullptr;
   while (curr && curr->longest() >= n) {
     if (curr->range().len() >= n) {
+    #ifndef TCMALLOC_LOW_ADDRESS_FIRST
       if (!best || best->range().len() > curr->range().len()) {
         best = curr;
       }
+    #else
+      if (!best || best->range().start() > curr->range().start()) {
+        best = curr;
+      }
+    #endif
     }
 
     // Either subtree could contain a better fit and we don't want to
@@ -63,7 +69,7 @@ HugeAddressMap::Node *HugeAllocator::Find(HugeLength n) {
       curr = left;
       continue;
     }
-
+  #ifndef TCMALLOC_LOW_ADDRESS_FIRST
     // Here, we have a nontrivial choice.
     if (left->range().len() == right->range().len()) {
       if (left->longest() <= right->longest()) {
@@ -79,6 +85,9 @@ HugeAddressMap::Node *HugeAllocator::Find(HugeLength n) {
     } else {
       curr = right;
     }
+  #else
+    curr = left;
+  #endif
   }
   return best;
 }

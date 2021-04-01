@@ -63,7 +63,7 @@ ABSL_FLAG(std::string, profile, "beta",
 
 ABSL_FLAG(uint64_t, threads, 1, "Number of parallel allocators");
 
-ABSL_FLAG(uint64_t, bytes, 16ul << 20, "Total size of base heap");
+ABSL_FLAG(uint64_t, bytes, 412ul << 20, "Total size of base heap");
 
 ABSL_FLAG(uint64_t, transient_bytes, 0,
           "Additional size of data allocated at program start, then freed "
@@ -74,19 +74,19 @@ ABSL_FLAG(std::string, transient_profile, "",
           "it has the same meaning. Otherwise must be the empty string, "
           "which means copy --profile.");
 
-ABSL_FLAG(uint64_t, spike_bytes, 0,
+ABSL_FLAG(uint64_t, spike_bytes, 12ul<<20,
           "Additional memory allocated periodically. "
           "Could model per-query memory or diurnal variation, etc.");
 
-ABSL_FLAG(std::string, spike_profile, "",
+ABSL_FLAG(std::string, spike_profile, "echo",
           "If --spike_profile has one of the valid values for --profile it "
           "has the same meaning. Otherwise must be the empty string, which "
           "means copy --profile.");
 
-ABSL_FLAG(absl::Duration, spike_rate, absl::Milliseconds(1000),
+ABSL_FLAG(absl::Duration, spike_rate, absl::Milliseconds(10),
           "1/QPS for spikes");
 
-ABSL_FLAG(absl::Duration, spike_lifetime, absl::Milliseconds(2000),
+ABSL_FLAG(absl::Duration, spike_lifetime, absl::Milliseconds(10),
           "Processing time for spikes");
 
 ABSL_FLAG(bool, spikes_exact, false,
@@ -106,7 +106,7 @@ ABSL_FLAG(int64_t, simulated_bytes_per_sec, 0,
 
 ABSL_FLAG(bool, print_stats_to_file, false, "Write mallocz stats to a file");
 
-ABSL_FLAG(int64_t, empirical_malloc_release_bytes_per_sec, 4ul<<20,
+ABSL_FLAG(int64_t, empirical_malloc_release_bytes_per_sec, 1ul<<20,
           "Number of bytes to try to release from the page heap per second");
 
 namespace tcmalloc {

@@ -872,6 +872,37 @@ class HugePageFiller {
 
     // Removes a TrackerType from the first non-empty freelist with index at
     // least n and returns it. Returns nullptr if there is none.
+  #ifdef TCMALLOC_LOW_ADDRESS_FIRST
+    // sun: get lowest address trackertype
+    TrackerType *GetLeast(const size_t n) {
+      ASSERT(n < N);
+      size_t i = nonempty_.FindSet(n);
+      if (i == N) {
+        return nullptr;
+      }
+      TrackerType *pt=lists_[i].first(), *cur=nullptr;
+      size_t j = i;
+      while(j<N){
+        if(lists_[j].empty()){
+          j++;
+          continue;
+        }
+        cur=lists_[j].first();
+        if(cur->location()<pt->location()){
+          ASSERT(cur->longest_free_range()>=pt->longest_free_range());
+          pt = cur;
+          i = j;
+        }
+        j++;
+      }
+      CHECK_CONDITION(pt != nullptr);
+      if (lists_[i].remove(pt)) {
+        nonempty_.ClearBit(i);
+      }
+      --size_;
+      return pt;
+    }
+  #else
     TrackerType *GetLeast(const size_t n) {
       ASSERT(n < N);
       size_t i = nonempty_.FindSet(n);
@@ -887,6 +918,7 @@ class HugePageFiller {
       --size_;
       return pt;
     }
+  #endif
     void Add(TrackerType *pt, const size_t i) {
       ASSERT(i < N);
       ASSERT(pt != nullptr);

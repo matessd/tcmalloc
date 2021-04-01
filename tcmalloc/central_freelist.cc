@@ -41,14 +41,17 @@ static Span* MapObjectToSpan(void* object) {
 
 Span* CentralFreeList::ReleaseToSpans(void* object, Span* span) {
   if (span->FreelistEmpty()) {
-    //nonempty_.prepend(span);
+  #ifdef TCMALLOC_LOW_ADDRESS_FIRST
     nonempty_.insert(span);
+  #else
+    nonempty_.prepend(span);
+  #endif
   }
 
   if (span->FreelistPush(object, object_size_)) {
     return nullptr;
   }
-  //span->RemoveFromList();  // from nonempty_
+  span->RemoveFromList();  // from nonempty_
   return span;
 }
 
@@ -74,12 +77,13 @@ void CentralFreeList::InsertRange(void** batch, int N) {
     for (int i = 0; i < N; ++i) {
       Span* span = ReleaseToSpans(batch[i], spans[i]);
       if (span) {
-        //free_spans[free_count] = span;
-        //free_count++;
+        free_spans[free_count] = span;
+        free_count++;
         ASSERT(span->IsTotalFree());
       }
     }
-    /*Span * cur = nonempty_.last();
+    /*//sun: release
+    Span * cur = nonempty_.last();
     ASSERT(!nonempty_.empty());
     while(cur->IsTotalFree() && free_count<kMaxObjectsToMove){
       free_spans[free_count] = cur;
@@ -89,8 +93,8 @@ void CentralFreeList::InsertRange(void** batch, int N) {
         break;
       }
       cur = nonempty_.last();
-    }
-    RecordMultiSpansDeallocated(free_count);*/
+    }*/
+    RecordMultiSpansDeallocated(free_count);
     UpdateObjectCounts(N);
   }
 
@@ -145,8 +149,11 @@ void CentralFreeList::Populate() ABSL_NO_THREAD_SAFETY_ANALYSIS {
 
   // Add span to list of non-empty spans
   lock_.Lock();
-  //nonempty_.prepend(span);
-  nonempty_.insert(span);
+  #ifdef TCMALLOC_LOW_ADDRESS_FIRST
+    nonempty_.insert(span);
+  #else
+    nonempty_.prepend(span);
+  #endif
   RecordSpanAllocated();
 }
 

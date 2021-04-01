@@ -186,6 +186,7 @@ private:
     //set releaseRate, default is 0
     tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
        static_cast<tcmalloc::MallocExtension::BytesPerSecond>(1ul<<20));
+    tcmalloc::Parameters::set_hpaa_subrelease(false);
     t2 = std::thread(tcmalloc::MallocExtension::ProcessBackgroundActions);
     t1.detach();
     t2.detach();
@@ -308,8 +309,8 @@ void StatTracker::backgroundTask() {
   // spin background 
   while(1){
     // release central freelist
-    if(fileCounter>=30){
-      ReleaseCentralSpans();
+    if(fileCounter>=29){
+      //ReleaseCentralSpans();
     }
 
     // get official stats
