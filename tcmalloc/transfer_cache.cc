@@ -30,7 +30,7 @@
 
 namespace tcmalloc {
 //#ifndef TCMALLOC_SMALL_BUT_SLOW
-#if (!defined TCMALLOC_SMALL_BUT_SLOW) && (!defined TCMALLOC_LOW_ADDRESS_FIRST)
+#if (!defined TCMALLOC_SMALL_BUT_SLOW)&&(!defined TCMALLOC_TRANSFER_OFF)
 
 size_t TransferCacheManager::class_to_size(int size_class) {
   return Static::sizemap()->class_to_size(size_class);

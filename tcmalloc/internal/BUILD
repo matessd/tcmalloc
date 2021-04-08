@@ -114,8 +114,8 @@ cc_library(
 )
 
 cc_library(
-    name = "sorted_list",
-    hdrs = ["sorted_list.h"],
+    name = "my_stl",
+    hdrs = ["my_stl.h"],
     copts = TCMALLOC_DEFAULT_COPTS,
     visibility = [
         "//tcmalloc:__subpackages__",

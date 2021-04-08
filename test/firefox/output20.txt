@@ -1,54 +1,69 @@
 Cpu alloc/dealloc during last interval.
 Cpu_id  Alloc/Dealloc:
-0       126900/111139=1.14181
-1       255412/173078=1.4757
-2       115937/88075=1.31634
-3       68343/148585=0.459959
+0       345313/126426=2.73134
+1       179506/126565=1.41829
+2       207743/137197=1.51419
+3       877664/1127299=0.778555
 -----------------------------------
 Overall cpu stats.
-used bytes in cpu cache: 6.14378(MiB)
-used huge pages in cpu cache: 444(MiB)
+used bytes in cpu cache: 0.275467(MiB)
+used huge pages in cpu cache: 180(MiB)
 -----------------------------------
 Stats of in use huge pages(central/transfer/cpu/app).
-used huge pages count: 228
-average coverage: 0.732867
-average utilization: 0.843838
+used huge pages count: 217
+average coverage: 0.816586
+average utilization: 0.843355
+-----------------------------------
+Amount of hugepages with different longest_span_life.
+longest_span_life   amount of hugepages
+1                           11
+5                           1
+9                           3
+10                           21
+11                           26
+12                           18
+14                           29
+16                           32
+18                           3
+19                           18
+20                           48
+21                           7
 -----------------------------------
 See https://github.com/google/tcmalloc/tree/master/docs/stats.md for an explanation of this page
 ------------------------------------------------
-MALLOC:      364213680 (  347.3 MiB) Bytes in use by application
-MALLOC: +    146399232 (  139.6 MiB) Bytes in page heap freelist
-MALLOC: +     66336880 (   63.3 MiB) Bytes in central cache freelist
-MALLOC: +      6222560 (    5.9 MiB) Bytes in per-CPU cache freelist
-MALLOC: +      6127360 (    5.8 MiB) Bytes in transfer cache freelist
+MALLOC:      419489968 (  400.1 MiB) Bytes in use by application
+MALLOC: +     87613440 (   83.6 MiB) Bytes in page heap freelist
+MALLOC: +     61133904 (   58.3 MiB) Bytes in central cache freelist
+MALLOC: +        90880 (    0.1 MiB) Bytes in per-CPU cache freelist
+MALLOC: +            0 (    0.0 MiB) Bytes in transfer cache freelist
 MALLOC: +            0 (    0.0 MiB) Bytes in thread cache freelists
-MALLOC: +      5000210 (    4.8 MiB) Bytes in malloc metadata
+MALLOC: +      6272498 (    6.0 MiB) Bytes in malloc metadata
 MALLOC:   ------------
-MALLOC: =    594299922 (  566.8 MiB) Actual memory used (physical + swap)
-MALLOC: +     67108864 (   64.0 MiB) Bytes released to OS (aka unmapped)
+MALLOC: =    574600690 (  548.0 MiB) Actual memory used (physical + swap)
+MALLOC: +     46137344 (   44.0 MiB) Bytes released to OS (aka unmapped)
 MALLOC:   ------------
-MALLOC: =    661408786 (  630.8 MiB) Virtual address space used
+MALLOC: =    620738034 (  592.0 MiB) Virtual address space used
 MALLOC:
-MALLOC:          32382               Spans in use
-MALLOC:          43284 (    2.0 MiB) Spans created
+MALLOC:          31969               Spans in use
+MALLOC:          39666 (    2.1 MiB) Spans created
 MALLOC:              1               Thread heaps in use
-MALLOC:              2 (    0.0 MiB) Thread heaps created
-MALLOC:            352               Stack traces in use
-MALLOC:            450 (    0.2 MiB) Stack traces created
+MALLOC:              3 (    0.0 MiB) Thread heaps created
+MALLOC:            342               Stack traces in use
+MALLOC:            399 (    0.2 MiB) Stack traces created
 MALLOC:              0               Table buckets in use
 MALLOC:              1 (    0.0 MiB) Table buckets created
 MALLOC:        9868296 (    9.4 MiB) Pagemap bytes used
-MALLOC:          16392 (    0.0 MiB) Pagemap root resident bytes
+MALLOC:        1830920 (    1.7 MiB) Pagemap root resident bytes
 MALLOC:        1048576 (    1.0 MiB) per-CPU slab bytes used
 MALLOC:        1048576 (    1.0 MiB) per-CPU slab resident bytes
 MALLOC:           8192               Tcmalloc page size
 MALLOC:        2097152               Tcmalloc hugepage size
 MALLOC EXPERIMENTS: TCMALLOC_TEMERAIRE=0 TCMALLOC_SANS_56_SIZECLASS=0 TCMALLOC_ARBITRARY_TRANSFER_CACHE=0 TCMALLOC_LOCK_FREE_TRANSFER_CACHE=0 TCMALLOC_LARGE_NUM_TO_MOVE=0 TCMALLOC_4K_SIZE_CLASS=0 TCMALLOC_SKIP_SUBRELEASE_60SEC_V2=0
-MALLOC SAMPLED PROFILES: 345544103 bytes (current), 553327203 bytes (peak)
+MALLOC SAMPLED PROFILES: 418106250 bytes (current), 482561283 bytes (peak)
 
 Total process stats (inclusive of non-malloc sources):
-TOTAL:    846913536 (  807.7 MiB) Bytes resident (physical memory used)
-TOTAL:   5226770432 ( 4984.6 MiB) Bytes mapped (virtual memory used)
+TOTAL:    815251456 (  777.5 MiB) Bytes resident (physical memory used)
+TOTAL:   5234094080 ( 4991.6 MiB) Bytes mapped (virtual memory used)
 ------------------------------------------------
 Call ReleaseMemoryToSystem() to release freelist memory to the OS (via madvise()).
 Bytes released to the OS take up virtual address space but no physical memory.
@@ -58,239 +73,218 @@ transfer cache, and central cache, as well as number of
 live pages, returned/requested spans by size class
 ------------------------------------------------
 class   1 [        8 bytes ] :        0 objs;   0.0 MiB;   0.0 cum MiB;        0 live pages; spans:      1 ret /      1 req = 1.0000;
-class   2 [       16 bytes ] :    40867 objs;   0.6 MiB;   0.6 cum MiB;      496 live pages; spans:      9 ret /    505 req = 0.0178;
-class   3 [       32 bytes ] :    51724 objs;   1.6 MiB;   2.2 cum MiB;      941 live pages; spans:     49 ret /    990 req = 0.0495;
-class   4 [       48 bytes ] :    37124 objs;   1.7 MiB;   3.9 cum MiB;      754 live pages; spans:     42 ret /    796 req = 0.0528;
-class   5 [       64 bytes ] :    69049 objs;   4.2 MiB;   8.1 cum MiB;     1436 live pages; spans:    831 ret /   2267 req = 0.3666;
-class   6 [       80 bytes ] :    48973 objs;   3.7 MiB;  11.9 cum MiB;     2600 live pages; spans:   5797 ret /   8397 req = 0.6904;
-class   7 [       96 bytes ] :    21307 objs;   2.0 MiB;  13.8 cum MiB;      826 live pages; spans:    343 ret /   1169 req = 0.2934;
-class   8 [      112 bytes ] :    10284 objs;   1.1 MiB;  14.9 cum MiB;      395 live pages; spans:      3 ret /    398 req = 0.0075;
-class   9 [      128 bytes ] :   223111 objs;  27.2 MiB;  42.1 cum MiB;     9882 live pages; spans:   7187 ret /  17069 req = 0.4211;
-class  10 [      144 bytes ] :    22547 objs;   3.1 MiB;  45.2 cum MiB;     1430 live pages; spans:   1072 ret /   2502 req = 0.4285;
-class  11 [      160 bytes ] :     4818 objs;   0.7 MiB;  46.0 cum MiB;      221 live pages; spans:      2 ret /    223 req = 0.0090;
-class  12 [      176 bytes ] :     4152 objs;   0.7 MiB;  46.7 cum MiB;      248 live pages; spans:      0 ret /    248 req = 0.0000;
-class  13 [      192 bytes ] :     3063 objs;   0.6 MiB;  47.2 cum MiB;      283 live pages; spans:      6 ret /    289 req = 0.0208;
-class  14 [      208 bytes ] :     2395 objs;   0.5 MiB;  47.7 cum MiB;      192 live pages; spans:      0 ret /    192 req = 0.0000;
-class  15 [      224 bytes ] :     1898 objs;   0.4 MiB;  48.1 cum MiB;      168 live pages; spans:      0 ret /    168 req = 0.0000;
-class  16 [      240 bytes ] :      660 objs;   0.2 MiB;  48.3 cum MiB;     1238 live pages; spans:   4939 ret /   6177 req = 0.7996;
-class  17 [      256 bytes ] :     4691 objs;   1.1 MiB;  49.4 cum MiB;      634 live pages; spans:     62 ret /    696 req = 0.0891;
-class  18 [      272 bytes ] :      997 objs;   0.3 MiB;  49.7 cum MiB;       74 live pages; spans:      4 ret /     78 req = 0.0513;
-class  19 [      288 bytes ] :      777 objs;   0.2 MiB;  49.9 cum MiB;       80 live pages; spans:      9 ret /     89 req = 0.1011;
-class  20 [      304 bytes ] :      735 objs;   0.2 MiB;  50.1 cum MiB;       72 live pages; spans:      8 ret /     80 req = 0.1000;
-class  21 [      320 bytes ] :      788 objs;   0.2 MiB;  50.3 cum MiB;       87 live pages; spans:      3 ret /     90 req = 0.0333;
-class  22 [      336 bytes ] :      765 objs;   0.2 MiB;  50.6 cum MiB;       70 live pages; spans:      3 ret /     73 req = 0.0411;
-class  23 [      352 bytes ] :      668 objs;   0.2 MiB;  50.8 cum MiB;       65 live pages; spans:      3 ret /     68 req = 0.0441;
-class  24 [      368 bytes ] :      546 objs;   0.2 MiB;  51.0 cum MiB;      116 live pages; spans:      8 ret /    124 req = 0.0645;
-class  25 [      384 bytes ] :     1909 objs;   0.7 MiB;  51.7 cum MiB;      305 live pages; spans:    158 ret /    463 req = 0.3413;
-class  26 [      400 bytes ] :      351 objs;   0.1 MiB;  51.8 cum MiB;       48 live pages; spans:     15 ret /     63 req = 0.2381;
-class  27 [      416 bytes ] :      457 objs;   0.2 MiB;  52.0 cum MiB;       69 live pages; spans:      1 ret /     70 req = 0.0143;
-class  28 [      448 bytes ] :      522 objs;   0.2 MiB;  52.2 cum MiB;       95 live pages; spans:     14 ret /    109 req = 0.1284;
-class  29 [      480 bytes ] :      175 objs;   0.1 MiB;  52.3 cum MiB;     3611 live pages; spans:  20874 ret /  24485 req = 0.8525;
-class  30 [      512 bytes ] :     2105 objs;   1.0 MiB;  53.3 cum MiB;      595 live pages; spans:      5 ret /    600 req = 0.0083;
-class  31 [      576 bytes ] :      907 objs;   0.5 MiB;  53.8 cum MiB;      167 live pages; spans:     19 ret /    186 req = 0.1022;
-class  32 [      640 bytes ] :      507 objs;   0.3 MiB;  54.1 cum MiB;      133 live pages; spans:     39 ret /    172 req = 0.2267;
-class  33 [      704 bytes ] :      525 objs;   0.4 MiB;  54.5 cum MiB;      169 live pages; spans:     14 ret /    183 req = 0.0765;
-class  34 [      768 bytes ] :      320 objs;   0.2 MiB;  54.7 cum MiB;      112 live pages; spans:     38 ret /    150 req = 0.2533;
-class  35 [      896 bytes ] :      777 objs;   0.7 MiB;  55.4 cum MiB;      394 live pages; spans:    278 ret /    672 req = 0.4137;
-class  36 [     1024 bytes ] :     2590 objs;   2.5 MiB;  57.9 cum MiB;      693 live pages; spans:    106 ret /    799 req = 0.1327;
-class  37 [     1152 bytes ] :      298 objs;   0.3 MiB;  58.2 cum MiB;      158 live pages; spans:     15 ret /     94 req = 0.1596;
-class  38 [     1280 bytes ] :      252 objs;   0.3 MiB;  58.6 cum MiB;      208 live pages; spans:      4 ret /    108 req = 0.0370;
-class  39 [     1408 bytes ] :      127 objs;   0.2 MiB;  58.7 cum MiB;      146 live pages; spans:      9 ret /     82 req = 0.1098;
-class  40 [     1536 bytes ] :      162 objs;   0.2 MiB;  59.0 cum MiB;      188 live pages; spans:      2 ret /     96 req = 0.0208;
-class  41 [     1792 bytes ] :      201 objs;   0.3 MiB;  59.3 cum MiB;      260 live pages; spans:     18 ret /    148 req = 0.1216;
-class  42 [     2048 bytes ] :     3312 objs;   6.5 MiB;  65.8 cum MiB;     1346 live pages; spans:    645 ret /   1318 req = 0.4894;
-class  43 [     2304 bytes ] :      101 objs;   0.2 MiB;  66.0 cum MiB;      168 live pages; spans:     18 ret /    102 req = 0.1765;
-class  44 [     2688 bytes ] :      162 objs;   0.4 MiB;  66.4 cum MiB;      166 live pages; spans:      3 ret /     86 req = 0.0349;
-class  45 [     2816 bytes ] :       64 objs;   0.2 MiB;  66.6 cum MiB;       45 live pages; spans:      4 ret /     19 req = 0.2105;
-class  46 [     3200 bytes ] :       51 objs;   0.2 MiB;  66.7 cum MiB;       92 live pages; spans:     11 ret /     57 req = 0.1930;
-class  47 [     3456 bytes ] :       56 objs;   0.2 MiB;  66.9 cum MiB;       45 live pages; spans:      9 ret /     24 req = 0.3750;
-class  48 [     3584 bytes ] :       57 objs;   0.2 MiB;  67.1 cum MiB;       92 live pages; spans:      1 ret /     24 req = 0.0417;
-class  49 [     4096 bytes ] :       38 objs;   0.1 MiB;  67.3 cum MiB;     1374 live pages; spans:  11223 ret /  11910 req = 0.9423;
-class  50 [     4736 bytes ] :       47 objs;   0.2 MiB;  67.5 cum MiB;       72 live pages; spans:     43 ret /     67 req = 0.6418;
-class  51 [     5376 bytes ] :       23 objs;   0.1 MiB;  67.6 cum MiB;      106 live pages; spans:     32 ret /     85 req = 0.3765;
-class  52 [     6144 bytes ] :       25 objs;   0.1 MiB;  67.7 cum MiB;       99 live pages; spans:     30 ret /     63 req = 0.4762;
-class  53 [     6528 bytes ] :       19 objs;   0.1 MiB;  67.9 cum MiB;       84 live pages; spans:     14 ret /     35 req = 0.4000;
-class  54 [     6784 bytes ] :       10 objs;   0.1 MiB;  67.9 cum MiB;       15 live pages; spans:      1 ret /      4 req = 0.2500;
-class  55 [     7168 bytes ] :       21 objs;   0.1 MiB;  68.1 cum MiB;       42 live pages; spans:      7 ret /     13 req = 0.5385;
-class  56 [     8192 bytes ] :      186 objs;   1.5 MiB;  69.5 cum MiB;      352 live pages; spans:   5730 ret /   5906 req = 0.9702;
-class  57 [     9472 bytes ] :       20 objs;   0.2 MiB;  69.7 cum MiB;       65 live pages; spans:     27 ret /     40 req = 0.6750;
-class  58 [    10240 bytes ] :       20 objs;   0.2 MiB;  69.9 cum MiB;      164 live pages; spans:     53 ret /     94 req = 0.5638;
-class  59 [    12288 bytes ] :       10 objs;   0.1 MiB;  70.0 cum MiB;      120 live pages; spans:     79 ret /    119 req = 0.6639;
-class  60 [    13568 bytes ] :        6 objs;   0.1 MiB;  70.1 cum MiB;      120 live pages; spans:     35 ret /     59 req = 0.5932;
-class  61 [    14336 bytes ] :       11 objs;   0.2 MiB;  70.2 cum MiB;       42 live pages; spans:      6 ret /     12 req = 0.5000;
-class  62 [    16384 bytes ] :       53 objs;   0.8 MiB;  71.1 cum MiB;      404 live pages; spans:   2345 ret /   2547 req = 0.9207;
-class  63 [    20480 bytes ] :        6 objs;   0.1 MiB;  71.2 cum MiB;      110 live pages; spans:     56 ret /     78 req = 0.7179;
-class  64 [    24576 bytes ] :        3 objs;   0.1 MiB;  71.3 cum MiB;      150 live pages; spans:    996 ret /   1046 req = 0.9522;
-class  65 [    28672 bytes ] :        4 objs;   0.1 MiB;  71.4 cum MiB;       70 live pages; spans:     27 ret /     37 req = 0.7297;
-class  66 [    32768 bytes ] :       14 objs;   0.4 MiB;  71.8 cum MiB;     1304 live pages; spans:   6367 ret /   6693 req = 0.9513;
-class  67 [    40960 bytes ] :        1 objs;   0.0 MiB;  71.8 cum MiB;      525 live pages; spans:    422 ret /    527 req = 0.8008;
-class  68 [    49152 bytes ] :        2 objs;   0.1 MiB;  71.9 cum MiB;      348 live pages; spans:    641 ret /    699 req = 0.9170;
-class  69 [    57344 bytes ] :        0 objs;   0.0 MiB;  71.9 cum MiB;      105 live pages; spans:    174 ret /    189 req = 0.9206;
-class  70 [    65536 bytes ] :        9 objs;   0.6 MiB;  72.5 cum MiB;      208 live pages; spans:   1050 ret /   1076 req = 0.9758;
-class  71 [    73728 bytes ] :        0 objs;   0.0 MiB;  72.5 cum MiB;       45 live pages; spans:    551 ret /    556 req = 0.9910;
-class  72 [    81920 bytes ] :        0 objs;   0.0 MiB;  72.5 cum MiB;       20 live pages; spans:     77 ret /     79 req = 0.9747;
-class  73 [    90112 bytes ] :        0 objs;   0.0 MiB;  72.5 cum MiB;       66 live pages; spans:     54 ret /     60 req = 0.9000;
-class  74 [    98304 bytes ] :        0 objs;   0.0 MiB;  72.5 cum MiB;       72 live pages; spans:    200 ret /    206 req = 0.9709;
-class  75 [   106496 bytes ] :        0 objs;   0.0 MiB;  72.5 cum MiB;       65 live pages; spans:     26 ret /     31 req = 0.8387;
-class  76 [   122880 bytes ] :        0 objs;   0.0 MiB;  72.5 cum MiB;      450 live pages; spans:     24 ret /     54 req = 0.4444;
-class  77 [   131072 bytes ] :        8 objs;   1.0 MiB;  73.5 cum MiB;      592 live pages; spans:   3254 ret /   3291 req = 0.9888;
-class  78 [   139264 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;       17 live pages; spans:      2 ret /      3 req = 0.6667;
-class  79 [   155648 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;      133 live pages; spans:     12 ret /     19 req = 0.6316;
-class  80 [   163840 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;       40 live pages; spans:     61 ret /     63 req = 0.9683;
-class  81 [   180224 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;      132 live pages; spans:     23 ret /     29 req = 0.7931;
-class  82 [   204800 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;      125 live pages; spans:     88 ret /     93 req = 0.9462;
-class  83 [   221184 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;      135 live pages; spans:     20 ret /     25 req = 0.8000;
-class  84 [   237568 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;        0 live pages; spans:      7 ret /      7 req = 1.0000;
-class  85 [   262144 bytes ] :        0 objs;   0.0 MiB;  73.5 cum MiB;      992 live pages; spans:    736 ret /    767 req = 0.9596;
+class   2 [       16 bytes ] :    33974 objs;   0.5 MiB;   0.5 cum MiB;      497 live pages; spans:     62 ret /    559 req = 0.1109;
+class   3 [       32 bytes ] :    38284 objs;   1.2 MiB;   1.7 cum MiB;      892 live pages; spans:    145 ret /   1037 req = 0.1398;
+class   4 [       48 bytes ] :    28828 objs;   1.3 MiB;   3.0 cum MiB;      668 live pages; spans:    520 ret /   1188 req = 0.4377;
+class   5 [       64 bytes ] :    33819 objs;   2.1 MiB;   5.1 cum MiB;     1255 live pages; spans:   1391 ret /   2646 req = 0.5257;
+class   6 [       80 bytes ] :    58341 objs;   4.5 MiB;   9.5 cum MiB;     2822 live pages; spans:   5021 ret /   7843 req = 0.6402;
+class   7 [       96 bytes ] :    20644 objs;   1.9 MiB;  11.4 cum MiB;      813 live pages; spans:    479 ret /   1292 req = 0.3707;
+class   8 [      112 bytes ] :    12004 objs;   1.3 MiB;  12.7 cum MiB;      429 live pages; spans:     96 ret /    525 req = 0.1829;
+class   9 [      128 bytes ] :   210131 objs;  25.7 MiB;  38.3 cum MiB;    10163 live pages; spans:  14967 ret /  25130 req = 0.5956;
+class  10 [      144 bytes ] :    16551 objs;   2.3 MiB;  40.6 cum MiB;     1323 live pages; spans:   1146 ret /   2469 req = 0.4642;
+class  11 [      160 bytes ] :     3849 objs;   0.6 MiB;  41.2 cum MiB;      199 live pages; spans:     76 ret /    275 req = 0.2764;
+class  12 [      176 bytes ] :     3464 objs;   0.6 MiB;  41.8 cum MiB;      227 live pages; spans:     92 ret /    319 req = 0.2884;
+class  13 [      192 bytes ] :     1508 objs;   0.3 MiB;  42.1 cum MiB;      242 live pages; spans:     71 ret /    313 req = 0.2268;
+class  14 [      208 bytes ] :     2655 objs;   0.5 MiB;  42.6 cum MiB;      196 live pages; spans:     25 ret /    221 req = 0.1131;
+class  15 [      224 bytes ] :     2042 objs;   0.4 MiB;  43.0 cum MiB;      166 live pages; spans:     24 ret /    190 req = 0.1263;
+class  16 [      240 bytes ] :      137 objs;   0.0 MiB;  43.1 cum MiB;     1325 live pages; spans:   5657 ret /   6982 req = 0.8102;
+class  17 [      256 bytes ] :     6101 objs;   1.5 MiB;  44.5 cum MiB;      560 live pages; spans:    238 ret /    798 req = 0.2982;
+class  18 [      272 bytes ] :      962 objs;   0.2 MiB;  44.8 cum MiB;       72 live pages; spans:     26 ret /     98 req = 0.2653;
+class  19 [      288 bytes ] :      991 objs;   0.3 MiB;  45.1 cum MiB;       86 live pages; spans:     21 ret /    107 req = 0.1963;
+class  20 [      304 bytes ] :      751 objs;   0.2 MiB;  45.3 cum MiB;       72 live pages; spans:     22 ret /     94 req = 0.2340;
+class  21 [      320 bytes ] :      878 objs;   0.3 MiB;  45.6 cum MiB;       91 live pages; spans:     15 ret /    106 req = 0.1415;
+class  22 [      336 bytes ] :      699 objs;   0.2 MiB;  45.8 cum MiB;       66 live pages; spans:     22 ret /     88 req = 0.2500;
+class  23 [      352 bytes ] :      656 objs;   0.2 MiB;  46.0 cum MiB;       63 live pages; spans:     22 ret /     85 req = 0.2588;
+class  24 [      368 bytes ] :      623 objs;   0.2 MiB;  46.2 cum MiB;      118 live pages; spans:     30 ret /    148 req = 0.2027;
+class  25 [      384 bytes ] :       50 objs;   0.0 MiB;  46.2 cum MiB;      216 live pages; spans:    390 ret /    606 req = 0.6436;
+class  26 [      400 bytes ] :      508 objs;   0.2 MiB;  46.4 cum MiB;       54 live pages; spans:     21 ret /     75 req = 0.2800;
+class  27 [      416 bytes ] :      417 objs;   0.2 MiB;  46.6 cum MiB;       66 live pages; spans:     15 ret /     81 req = 0.1852;
+class  28 [      448 bytes ] :      550 objs;   0.2 MiB;  46.8 cum MiB;       90 live pages; spans:     38 ret /    128 req = 0.2969;
+class  29 [      480 bytes ] :      109 objs;   0.0 MiB;  46.9 cum MiB;     3812 live pages; spans:  21453 ret /  25265 req = 0.8491;
+class  30 [      512 bytes ] :     1811 objs;   0.9 MiB;  47.8 cum MiB;      570 live pages; spans:    205 ret /    775 req = 0.2645;
+class  31 [      576 bytes ] :      683 objs;   0.4 MiB;  48.1 cum MiB;      150 live pages; spans:     56 ret /    206 req = 0.2718;
+class  32 [      640 bytes ] :      598 objs;   0.4 MiB;  48.5 cum MiB;      139 live pages; spans:     69 ret /    208 req = 0.3317;
+class  33 [      704 bytes ] :      497 objs;   0.3 MiB;  48.8 cum MiB;      158 live pages; spans:     40 ret /    198 req = 0.2020;
+class  34 [      768 bytes ] :      384 objs;   0.3 MiB;  49.1 cum MiB;      119 live pages; spans:     55 ret /    174 req = 0.3161;
+class  35 [      896 bytes ] :       29 objs;   0.0 MiB;  49.1 cum MiB;      313 live pages; spans:    514 ret /    827 req = 0.6215;
+class  36 [     1024 bytes ] :      652 objs;   0.6 MiB;  49.8 cum MiB;      473 live pages; spans:   2791 ret /   3264 req = 0.8551;
+class  37 [     1152 bytes ] :      414 objs;   0.5 MiB;  50.2 cum MiB;      176 live pages; spans:     24 ret /    112 req = 0.2143;
+class  38 [     1280 bytes ] :      382 objs;   0.5 MiB;  50.7 cum MiB;      228 live pages; spans:     15 ret /    129 req = 0.1163;
+class  39 [     1408 bytes ] :      184 objs;   0.2 MiB;  50.9 cum MiB;      156 live pages; spans:     17 ret /     95 req = 0.1789;
+class  40 [     1536 bytes ] :      181 objs;   0.3 MiB;  51.2 cum MiB;      192 live pages; spans:     10 ret /    106 req = 0.0943;
+class  41 [     1792 bytes ] :      286 objs;   0.5 MiB;  51.7 cum MiB;      282 live pages; spans:     28 ret /    169 req = 0.1657;
+class  42 [     2048 bytes ] :      603 objs;   1.2 MiB;  52.9 cum MiB;      720 live pages; spans:  11721 ret /  12081 req = 0.9702;
+class  43 [     2304 bytes ] :      120 objs;   0.3 MiB;  53.1 cum MiB;      164 live pages; spans:     21 ret /    103 req = 0.2039;
+class  44 [     2688 bytes ] :      105 objs;   0.3 MiB;  53.4 cum MiB;      150 live pages; spans:     20 ret /     95 req = 0.2105;
+class  45 [     2816 bytes ] :       51 objs;   0.1 MiB;  53.5 cum MiB;       42 live pages; spans:     21 ret /     35 req = 0.6000;
+class  46 [     3200 bytes ] :       61 objs;   0.2 MiB;  53.7 cum MiB;       96 live pages; spans:     24 ret /     72 req = 0.3333;
+class  47 [     3456 bytes ] :       48 objs;   0.2 MiB;  53.9 cum MiB;       42 live pages; spans:     39 ret /     53 req = 0.7358;
+class  48 [     3584 bytes ] :       73 objs;   0.2 MiB;  54.1 cum MiB;       96 live pages; spans:      2 ret /     26 req = 0.0769;
+class  49 [     4096 bytes ] :      213 objs;   0.8 MiB;  55.0 cum MiB;     1320 live pages; spans:  11918 ret /  12578 req = 0.9475;
+class  50 [     4736 bytes ] :       57 objs;   0.3 MiB;  55.2 cum MiB;       81 live pages; spans:     48 ret /     75 req = 0.6400;
+class  51 [     5376 bytes ] :       18 objs;   0.1 MiB;  55.3 cum MiB;      104 live pages; spans:     52 ret /    104 req = 0.5000;
+class  52 [     6144 bytes ] :       37 objs;   0.2 MiB;  55.5 cum MiB;      111 live pages; spans:     25 ret /     62 req = 0.4032;
+class  53 [     6528 bytes ] :       25 objs;   0.2 MiB;  55.7 cum MiB;       88 live pages; spans:     10 ret /     32 req = 0.3125;
+class  54 [     6784 bytes ] :       11 objs;   0.1 MiB;  55.8 cum MiB;       15 live pages; spans:      5 ret /      8 req = 0.6250;
+class  55 [     7168 bytes ] :       22 objs;   0.2 MiB;  55.9 cum MiB;       42 live pages; spans:      8 ret /     14 req = 0.5714;
+class  56 [     8192 bytes ] :       49 objs;   0.4 MiB;  56.3 cum MiB;      220 live pages; spans:   8176 ret /   8286 req = 0.9867;
+class  57 [     9472 bytes ] :       17 objs;   0.2 MiB;  56.5 cum MiB;       65 live pages; spans:     24 ret /     37 req = 0.6486;
+class  58 [    10240 bytes ] :        8 objs;   0.1 MiB;  56.5 cum MiB;      160 live pages; spans:    150 ret /    190 req = 0.7895;
+class  59 [    12288 bytes ] :        5 objs;   0.1 MiB;  56.6 cum MiB;      114 live pages; spans:    102 ret /    140 req = 0.7286;
+class  60 [    13568 bytes ] :        4 objs;   0.1 MiB;  56.6 cum MiB;      120 live pages; spans:     30 ret /     54 req = 0.5556;
+class  61 [    14336 bytes ] :        2 objs;   0.0 MiB;  56.7 cum MiB;       21 live pages; spans:     20 ret /     23 req = 0.8696;
+class  62 [    16384 bytes ] :        0 objs;   0.0 MiB;  56.7 cum MiB;      386 live pages; spans:   8025 ret /   8218 req = 0.9765;
+class  63 [    20480 bytes ] :        7 objs;   0.1 MiB;  56.8 cum MiB;      110 live pages; spans:     65 ret /     87 req = 0.7471;
+class  64 [    24576 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      135 live pages; spans:   1500 ret /   1545 req = 0.9709;
+class  65 [    28672 bytes ] :        1 objs;   0.0 MiB;  56.8 cum MiB;       70 live pages; spans:     56 ret /     66 req = 0.8485;
+class  66 [    32768 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      836 live pages; spans:  16960 ret /  17169 req = 0.9878;
+class  67 [    40960 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      540 live pages; spans:    435 ret /    543 req = 0.8011;
+class  68 [    49152 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      372 live pages; spans:    670 ret /    732 req = 0.9153;
+class  69 [    57344 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       98 live pages; spans:    157 ret /    171 req = 0.9181;
+class  70 [    65536 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      160 live pages; spans:   2753 ret /   2773 req = 0.9928;
+class  71 [    73728 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       54 live pages; spans:    575 ret /    581 req = 0.9897;
+class  72 [    81920 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       30 live pages; spans:     73 ret /     76 req = 0.9605;
+class  73 [    90112 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       55 live pages; spans:     66 ret /     71 req = 0.9296;
+class  74 [    98304 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       60 live pages; spans:    205 ret /    210 req = 0.9762;
+class  75 [   106496 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       65 live pages; spans:     44 ret /     49 req = 0.8980;
+class  76 [   122880 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      450 live pages; spans:     38 ret /     68 req = 0.5588;
+class  77 [   131072 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;     4864 live pages; spans:   3965 ret /   4269 req = 0.9288;
+class  78 [   139264 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       17 live pages; spans:     18 ret /     19 req = 0.9474;
+class  79 [   155648 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      133 live pages; spans:     44 ret /     51 req = 0.8627;
+class  80 [   163840 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;       60 live pages; spans:     63 ret /     66 req = 0.9545;
+class  81 [   180224 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      132 live pages; spans:     22 ret /     28 req = 0.7857;
+class  82 [   204800 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      100 live pages; spans:    101 ret /    105 req = 0.9619;
+class  83 [   221184 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      135 live pages; spans:     54 ret /     59 req = 0.9153;
+class  84 [   237568 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;        0 live pages; spans:     18 ret /     18 req = 1.0000;
+class  85 [   262144 bytes ] :        0 objs;   0.0 MiB;  56.8 cum MiB;      960 live pages; spans:   1188 ret /   1218 req = 0.9754;
 ------------------------------------------------
 Transfer cache insert/remove hits/misses by size class
-class   1 [        8 bytes ] :        0 insert hits;       32 insert misses;        0 remove hits;        1 remove misses;
-class   2 [       16 bytes ] :     5762 insert hits;    10057 insert misses;     5666 remove hits;    16857 remove misses;
-class   3 [       32 bytes ] :     6918 insert hits;    15263 insert misses;     6817 remove hits;    21344 remove misses;
-class   4 [       48 bytes ] :     4676 insert hits;    12016 insert misses;     4593 remove hits;    15537 remove misses;
-class   5 [       64 bytes ] :     7888 insert hits;    34778 insert misses;     7835 remove hits;    38476 remove misses;
-class   6 [       80 bytes ] :     3238 insert hits;    41309 insert misses;     3169 remove hits;    54982 remove misses;
-class   7 [       96 bytes ] :     3457 insert hits;     4881 insert misses;     3390 remove hits;     6904 remove misses;
-class   8 [      112 bytes ] :     1648 insert hits;     1521 insert misses;     1554 remove hits;     2477 remove misses;
-class   9 [      128 bytes ] :     5265 insert hits;    90535 insert misses;     5182 remove hits;   103454 remove misses;
-class  10 [      144 bytes ] :     2917 insert hits;    10478 insert misses;     2867 remove hits;    12957 remove misses;
-class  11 [      160 bytes ] :      862 insert hits;      156 insert misses;      803 remove hits;      507 remove misses;
-class  12 [      176 bytes ] :     2175 insert hits;      205 insert misses;     2119 remove hits;      624 remove misses;
-class  13 [      192 bytes ] :      746 insert hits;      198 insert misses;      703 remove hits;      707 remove misses;
-class  14 [      208 bytes ] :      341 insert hits;      202 insert misses;      306 remove hits;      474 remove misses;
-class  15 [      224 bytes ] :      344 insert hits;      127 insert misses;      299 remove hits;      423 remove misses;
-class  16 [      240 bytes ] :     3084 insert hits;     7977 insert misses;     3035 remove hits;    15113 remove misses;
-class  17 [      256 bytes ] :     2379 insert hits;     1095 insert misses;     2329 remove hits;     1639 remove misses;
-class  18 [      272 bytes ] :       81 insert hits;      471 insert misses;       50 remove hits;      195 remove misses;
-class  19 [      288 bytes ] :      110 insert hits;      205 insert misses;       69 remove hits;      204 remove misses;
-class  20 [      304 bytes ] :       66 insert hits;      447 insert misses;       34 remove hits;      189 remove misses;
-class  21 [      320 bytes ] :      118 insert hits;      144 insert misses;       70 remove hits;      212 remove misses;
-class  22 [      336 bytes ] :       74 insert hits;      396 insert misses;       41 remove hits;      171 remove misses;
-class  23 [      352 bytes ] :      110 insert hits;      146 insert misses;       74 remove hits;      168 remove misses;
-class  24 [      368 bytes ] :       50 insert hits;      564 insert misses;       23 remove hits;      243 remove misses;
-class  25 [      384 bytes ] :      500 insert hits;      349 insert misses;      474 remove hits;      608 remove misses;
-class  26 [      400 bytes ] :       16 insert hits;      754 insert misses;        9 remove hits;      161 remove misses;
-class  27 [      416 bytes ] :       47 insert hits;      440 insert misses;       29 remove hits;      171 remove misses;
-class  28 [      448 bytes ] :       50 insert hits;      617 insert misses;       39 remove hits;      228 remove misses;
-class  29 [      480 bytes ] :     1151 insert hits;    12180 insert misses;     1090 remove hits;    25630 remove misses;
-class  30 [      512 bytes ] :      889 insert hits;      115 insert misses;      848 remove hits;      691 remove misses;
-class  31 [      576 bytes ] :      106 insert hits;      197 insert misses;       70 remove hits;      302 remove misses;
-class  32 [      640 bytes ] :       90 insert hits;      216 insert misses;       50 remove hits;      277 remove misses;
-class  33 [      704 bytes ] :       99 insert hits;      228 insert misses;       68 remove hits;      287 remove misses;
-class  34 [      768 bytes ] :       46 insert hits;      285 insert misses;       25 remove hits;      249 remove misses;
-class  35 [      896 bytes ] :      282 insert hits;      266 insert misses;      246 remove hits;      800 remove misses;
-class  36 [     1024 bytes ] :     1254 insert hits;      461 insert misses;     1207 remove hits;     1198 remove misses;
-class  37 [     1152 bytes ] :       27 insert hits;      405 insert misses;       18 remove hits;      188 remove misses;
-class  38 [     1280 bytes ] :       48 insert hits;      207 insert misses;       30 remove hits;      197 remove misses;
-class  39 [     1408 bytes ] :       16 insert hits;      524 insert misses;       13 remove hits;      170 remove misses;
-class  40 [     1536 bytes ] :       34 insert hits;      323 insert misses;       32 remove hits;      180 remove misses;
-class  41 [     1792 bytes ] :       19 insert hits;      398 insert misses;       12 remove hits;      243 remove misses;
-class  42 [     2048 bytes ] :     1483 insert hits;     3425 insert misses;     1444 remove hits;     4518 remove misses;
-class  43 [     2304 bytes ] :       24 insert hits;      642 insert misses;       19 remove hits;      206 remove misses;
-class  44 [     2688 bytes ] :       32 insert hits;      425 insert misses;       22 remove hits;      207 remove misses;
-class  45 [     2816 bytes ] :       26 insert hits;      785 insert misses;       24 remove hits;      149 remove misses;
-class  46 [     3200 bytes ] :       31 insert hits;      551 insert misses;       26 remove hits;      197 remove misses;
-class  47 [     3456 bytes ] :       71 insert hits;      665 insert misses;       62 remove hits;      160 remove misses;
-class  48 [     3584 bytes ] :        4 insert hits;     1019 insert misses;        3 remove hits;      149 remove misses;
-class  49 [     4096 bytes ] :      931 insert hits;     3540 insert misses;      898 remove hits;    12668 remove misses;
-class  50 [     4736 bytes ] :       81 insert hits;     1088 insert misses;       81 remove hits;      218 remove misses;
-class  51 [     5376 bytes ] :       36 insert hits;      920 insert misses;       33 remove hits;      290 remove misses;
-class  52 [     6144 bytes ] :       83 insert hits;     1316 insert misses;       80 remove hits;      282 remove misses;
-class  53 [     6528 bytes ] :        5 insert hits;     1027 insert misses;        4 remove hits;      207 remove misses;
-class  54 [     6784 bytes ] :        3 insert hits;      522 insert misses;        1 remove hits;       76 remove misses;
-class  55 [     7168 bytes ] :        3 insert hits;      989 insert misses;        2 remove hits;      153 remove misses;
-class  56 [     8192 bytes ] :     1502 insert hits;     1958 insert misses;     1479 remove hits;     6197 remove misses;
-class  57 [     9472 bytes ] :       36 insert hits;     1199 insert misses;       36 remove hits;      302 remove misses;
-class  58 [    10240 bytes ] :      190 insert hits;     1117 insert misses;      164 remove hits;      390 remove misses;
-class  59 [    12288 bytes ] :       71 insert hits;     1150 insert misses;       70 remove hits;      481 remove misses;
-class  60 [    13568 bytes ] :       10 insert hits;      668 insert misses;        9 remove hits;      285 remove misses;
-class  61 [    14336 bytes ] :       15 insert hits;      461 insert misses;       14 remove hits;      133 remove misses;
-class  62 [    16384 bytes ] :     1831 insert hits;      923 insert misses;     1784 remove hits;     2547 remove misses;
-class  63 [    20480 bytes ] :       44 insert hits;      844 insert misses;       42 remove hits;      409 remove misses;
-class  64 [    24576 bytes ] :      361 insert hits;      947 insert misses;      349 remove hits;     1046 remove misses;
-class  65 [    28672 bytes ] :       51 insert hits;      424 insert misses;       51 remove hits;      244 remove misses;
-class  66 [    32768 bytes ] :     6219 insert hits;     3278 insert misses;     6175 remove hits;     6693 remove misses;
-class  67 [    40960 bytes ] :       21 insert hits;      410 insert misses;       20 remove hits;      527 remove misses;
-class  68 [    49152 bytes ] :       68 insert hits;      623 insert misses;       63 remove hits;      699 remove misses;
-class  69 [    57344 bytes ] :        2 insert hits;      173 insert misses;        2 remove hits;      189 remove misses;
-class  70 [    65536 bytes ] :     1214 insert hits;      773 insert misses;     1189 remove hits;     1076 remove misses;
-class  71 [    73728 bytes ] :       52 insert hits;      541 insert misses;       52 remove hits;      556 remove misses;
-class  72 [    81920 bytes ] :        0 insert hits;       77 insert misses;        0 remove hits;       79 remove misses;
-class  73 [    90112 bytes ] :        1 insert hits;       54 insert misses;        1 remove hits;       60 remove misses;
-class  74 [    98304 bytes ] :        7 insert hits;      195 insert misses;        5 remove hits;      206 remove misses;
-class  75 [   106496 bytes ] :        0 insert hits;       26 insert misses;        0 remove hits;       31 remove misses;
-class  76 [   122880 bytes ] :        0 insert hits;       24 insert misses;        0 remove hits;       54 remove misses;
-class  77 [   131072 bytes ] :      738 insert hits;     1924 insert misses;      730 remove hits;     3291 remove misses;
-class  78 [   139264 bytes ] :        0 insert hits;        2 insert misses;        0 remove hits;        3 remove misses;
-class  79 [   155648 bytes ] :        0 insert hits;       12 insert misses;        0 remove hits;       19 remove misses;
-class  80 [   163840 bytes ] :        0 insert hits;       60 insert misses;        0 remove hits;       63 remove misses;
-class  81 [   180224 bytes ] :        0 insert hits;       23 insert misses;        0 remove hits;       29 remove misses;
-class  82 [   204800 bytes ] :        0 insert hits;       87 insert misses;        0 remove hits;       93 remove misses;
-class  83 [   221184 bytes ] :        1 insert hits;       20 insert misses;        1 remove hits;       25 remove misses;
-class  84 [   237568 bytes ] :        0 insert hits;        7 insert misses;        0 remove hits;        7 remove misses;
-class  85 [   262144 bytes ] :      416 insert hits;      687 insert misses;      402 remove hits;      767 remove misses;
+class   1 [        8 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   2 [       16 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   3 [       32 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   4 [       48 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   5 [       64 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   6 [       80 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   7 [       96 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   8 [      112 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class   9 [      128 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  10 [      144 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  11 [      160 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  12 [      176 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  13 [      192 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  14 [      208 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  15 [      224 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  16 [      240 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  17 [      256 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  18 [      272 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  19 [      288 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  20 [      304 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  21 [      320 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  22 [      336 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  23 [      352 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  24 [      368 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  25 [      384 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  26 [      400 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  27 [      416 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  28 [      448 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  29 [      480 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  30 [      512 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  31 [      576 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  32 [      640 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  33 [      704 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  34 [      768 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  35 [      896 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  36 [     1024 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  37 [     1152 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  38 [     1280 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  39 [     1408 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  40 [     1536 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  41 [     1792 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  42 [     2048 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  43 [     2304 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  44 [     2688 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  45 [     2816 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  46 [     3200 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  47 [     3456 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  48 [     3584 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  49 [     4096 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  50 [     4736 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  51 [     5376 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  52 [     6144 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  53 [     6528 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  54 [     6784 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  55 [     7168 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  56 [     8192 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  57 [     9472 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  58 [    10240 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  59 [    12288 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  60 [    13568 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  61 [    14336 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  62 [    16384 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  63 [    20480 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  64 [    24576 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  65 [    28672 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  66 [    32768 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  67 [    40960 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  68 [    49152 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  69 [    57344 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  70 [    65536 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  71 [    73728 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  72 [    81920 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  73 [    90112 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  74 [    98304 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  75 [   106496 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  76 [   122880 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  77 [   131072 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  78 [   139264 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  79 [   155648 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  80 [   163840 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  81 [   180224 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  82 [   204800 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  83 [   221184 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  84 [   237568 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
+class  85 [   262144 bytes ] :        0 insert hits;        0 insert misses;        0 remove hits;        0 remove misses;
 ------------------------------------------------
 Bytes in per-CPU caches (per cpu limit: 3145728 bytes)
 ------------------------------------------------
-cpu   0:      1616288 bytes (    1.5 MiB) with       83824 bytes unallocated  active populated
-cpu   1:      1376976 bytes (    1.3 MiB) with       21200 bytes unallocated  active populated
-cpu   2:      1595952 bytes (    1.5 MiB) with       80544 bytes unallocated  active populated
-cpu   3:      1624608 bytes (    1.5 MiB) with      130976 bytes unallocated  active populated
+cpu   0:            0 bytes (    0.0 MiB) with     3145728 bytes unallocated  active populated
+cpu   1:            0 bytes (    0.0 MiB) with     3145728 bytes unallocated  active populated
+cpu   2:       355568 bytes (    0.3 MiB) with     2483056 bytes unallocated  active populated
+cpu   3:            0 bytes (    0.0 MiB) with     2883584 bytes unallocated  active populated
 ------------------------------------------------
-HugePageAware: 37 sizes;  136.4 MiB free;   62.0 MiB unmapped
+HugePageAware: 16 sizes;   80.2 MiB free;   44.0 MiB unmapped
 ------------------------------------------------
-     1 pages *   1761 spans ~   13.8 MiB;   13.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     2 pages *   1219 spans ~   19.0 MiB;   32.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     3 pages *    368 spans ~    8.6 MiB;   41.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     4 pages *    564 spans ~   17.6 MiB;   59.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     5 pages *    219 spans ~    8.6 MiB;   67.6 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     6 pages *    204 spans ~    9.6 MiB;   77.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     7 pages *     93 spans ~    5.1 MiB;   82.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     8 pages *     98 spans ~    6.1 MiB;   88.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     9 pages *     58 spans ~    4.1 MiB;   92.5 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    10 pages *     54 spans ~    4.2 MiB;   96.7 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    11 pages *     32 spans ~    2.8 MiB;   99.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    12 pages *     28 spans ~    2.6 MiB;  102.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    13 pages *     19 spans ~    1.9 MiB;  104.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    14 pages *     13 spans ~    1.4 MiB;  105.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    15 pages *     10 spans ~    1.2 MiB;  106.6 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    16 pages *      5 spans ~    0.6 MiB;  107.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    17 pages *      6 spans ~    0.8 MiB;  108.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    18 pages *      6 spans ~    0.8 MiB;  108.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    19 pages *      1 spans ~    0.1 MiB;  109.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    20 pages *      2 spans ~    0.3 MiB;  109.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    21 pages *      2 spans ~    0.3 MiB;  109.6 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    22 pages *      1 spans ~    0.2 MiB;  109.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    24 pages *      2 spans ~    0.4 MiB;  110.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    25 pages *      2 spans ~    0.4 MiB;  110.6 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    26 pages *      2 spans ~    0.4 MiB;  111.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    28 pages *      2 spans ~    0.4 MiB;  111.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    30 pages *      1 spans ~    0.2 MiB;  111.6 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    31 pages *      1 spans ~    0.2 MiB;  111.9 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    34 pages *      1 spans ~    0.3 MiB;  112.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    35 pages *      1 spans ~    0.3 MiB;  112.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    38 pages *      2 spans ~    0.6 MiB;  113.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    42 pages *      1 spans ~    0.3 MiB;  113.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    56 pages *      1 spans ~    0.4 MiB;  113.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    68 pages *      1 spans ~    0.5 MiB;  114.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    93 pages *      1 spans ~    0.7 MiB;  115.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-   110 pages *      1 spans ~    0.9 MiB;  115.9 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-   124 pages *      1 spans ~    1.0 MiB;  116.9 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
- >=128 large *      7 spans ~   81.5 MiB;  198.4 MiB cum; unmapped:   62.0 MiB;   62.0 MiB cum
+     1 pages *   2453 spans ~   19.2 MiB;   19.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     2 pages *    962 spans ~   15.0 MiB;   34.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     3 pages *    259 spans ~    6.1 MiB;   40.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     4 pages *    447 spans ~   14.0 MiB;   54.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     5 pages *    173 spans ~    6.8 MiB;   61.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     6 pages *     84 spans ~    3.9 MiB;   64.9 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     7 pages *     35 spans ~    1.9 MiB;   66.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     8 pages *     66 spans ~    4.1 MiB;   71.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     9 pages *     25 spans ~    1.8 MiB;   72.7 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    10 pages *     20 spans ~    1.6 MiB;   74.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    11 pages *     13 spans ~    1.1 MiB;   75.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    12 pages *     10 spans ~    0.9 MiB;   76.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    13 pages *      7 spans ~    0.7 MiB;   77.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    14 pages *     11 spans ~    1.2 MiB;   78.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    15 pages *      5 spans ~    0.6 MiB;   78.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+    16 pages *      2 spans ~    0.2 MiB;   79.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+ >=128 large *      5 spans ~   45.1 MiB;  124.2 MiB cum; unmapped:   44.0 MiB;   44.0 MiB cum
 
 Huge page aware allocator components:
 ------------------------------------------------
 HugePageAware: breakdown of used / free / unmapped space:
-HugePageAware: filler  331.6 MiB used,  120.4 MiB free,    0.0 MiB unmapped
+HugePageAware: filler  353.8 MiB used,   80.2 MiB free,    0.0 MiB unmapped
 HugePageAware: region    0.0 MiB used,    0.0 MiB free,    0.0 MiB unmapped
-HugePageAware: cache    88.0 MiB used,   16.0 MiB free,    0.0 MiB unmapped
-HugePageAware: alloc     0.0 MiB used,    0.0 MiB free,   62.0 MiB unmapped
+HugePageAware: cache   100.0 MiB used,    0.0 MiB free,    0.0 MiB unmapped
+HugePageAware: alloc     0.0 MiB used,    0.0 MiB free,   44.0 MiB unmapped
 
-HugePageAware: filler donations 15
+HugePageAware: filler donations 14
 HugePageFiller: densely pack small requests into hugepages
-HugePageFiller: 226 total, 40 full, 186 partial, 0 released (0 partially), 0 quarantined
-HugePageFiller: 15410 pages free in 226 hugepages, 0.2664 free
-HugePageFiller: among non-fulls, 0.3236 free
+HugePageFiller: 217 total, 34 full, 183 partial, 0 released (0 partially), 0 quarantined
+HugePageFiller: 10268 pages free in 217 hugepages, 0.1848 free
+HugePageFiller: among non-fulls, 0.2192 free
 HugePageFiller: 0 used pages in subreleased hugepages (0 of them in partially released)
 HugePageFiller: 0 hugepages partially released, 0.0000 released
 HugePageFiller: 1.0000 of used pages hugepageable
@@ -299,10 +293,10 @@ HugePageFiller: Since startup, 0 pages subreleased, 0 hugepages broken, (0 pages
 HugePageFiller: fullness histograms
 
 HugePageFiller: # of regular hps with a<= # of free pages <b
-HugePageFiller: <  0<=    40 <  1<=     0 <  2<=    12 <  3<=     2 <  4<=    31 < 16<=    12
-HugePageFiller: < 32<=    10 < 48<=    12 < 64<=    14 < 80<=    11 < 96<=     9 <112<=    17
-HugePageFiller: <128<=    21 <144<=    15 <160<=     6 <176<=     8 <192<=     3 <208<=     0
-HugePageFiller: <224<=     1 <240<=     2 <252<=     0 <253<=     0 <254<=     0 <255<=     0
+HugePageFiller: <  0<=    34 <  1<=     0 <  2<=    13 <  3<=     2 <  4<=    24 < 16<=    16
+HugePageFiller: < 32<=    28 < 48<=    31 < 64<=    23 < 80<=    16 < 96<=     8 <112<=     6
+HugePageFiller: <128<=     9 <144<=     5 <160<=     2 <176<=     0 <192<=     0 <208<=     0
+HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of donated hps with a<= # of free pages <b
 HugePageFiller: <  0<=     0 <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     0 < 16<=     0
@@ -323,9 +317,9 @@ HugePageFiller: <128<=     0 <144<=     0 <160<=     0 <176<=     0 <192<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of regular hps with a<= longest free range <b
-HugePageFiller: <  0<=    40 <  1<=     0 <  2<=    36 <  3<=     7 <  4<=   114 < 16<=    18
-HugePageFiller: < 32<=     4 < 48<=     1 < 64<=     1 < 80<=     1 < 96<=     0 <112<=     1
-HugePageFiller: <128<=     2 <144<=     0 <160<=     0 <176<=     1 <192<=     0 <208<=     0
+HugePageFiller: <  0<=    34 <  1<=     0 <  2<=    30 <  3<=    12 <  4<=   138 < 16<=     2
+HugePageFiller: < 32<=     0 < 48<=     0 < 64<=     0 < 80<=     0 < 96<=     0 <112<=     0
+HugePageFiller: <128<=     0 <144<=     1 <160<=     0 <176<=     0 <192<=     0 <208<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of partial released hps with a<= longest free range <b
@@ -341,10 +335,10 @@ HugePageFiller: <128<=     0 <144<=     0 <160<=     0 <176<=     0 <192<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of regular hps with a<= # of allocations <b
-HugePageFiller: <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     0 <  5<=     3 < 17<=     5
-HugePageFiller: < 33<=     5 < 49<=     4 < 65<=    13 < 81<=     8 < 97<=    24 <113<=    31
-HugePageFiller: <129<=    22 <145<=    21 <161<=    25 <177<=    19 <193<=    16 <209<=    16
-HugePageFiller: <225<=    13 <241<=     1 <253<=     0 <254<=     0 <255<=     0 <256<=     0
+HugePageFiller: <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     0 <  5<=    13 < 17<=     6
+HugePageFiller: < 33<=     7 < 49<=     6 < 65<=     3 < 81<=     6 < 97<=    12 <113<=    16
+HugePageFiller: <129<=    16 <145<=    12 <161<=    29 <177<=    39 <193<=    28 <209<=    14
+HugePageFiller: <225<=    10 <241<=     0 <253<=     0 <254<=     0 <255<=     0 <256<=     0
 
 HugePageFiller: # of partial released hps with a<= # of allocations <b
 HugePageFiller: <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     0 <  5<=     0 < 17<=     0
@@ -361,10 +355,10 @@ HugePageFiller: <225<=     0 <241<=     0 <253<=     0 <254<=     0 <255<=     0
 HugePageFiller: time series over 5 min interval
 
 HugePageFiller: minimum free pages: 0 (0 backed)
-HugePageFiller: at peak demand: 59231 pages (and 161 free, 0 unmapped)
-HugePageFiller: at peak demand: 232 hps (232 regular, 0 donated, 0 partial, 0 released)
-HugePageFiller: at peak hps: 53648 pages (and 11120 free, 0 unmapped)
-HugePageFiller: at peak hps: 253 hps (253 regular, 0 donated, 0 partial, 0 released)
+HugePageFiller: at peak demand: 53622 pages (and 138 free, 0 unmapped)
+HugePageFiller: at peak demand: 210 hps (210 regular, 0 donated, 0 partial, 0 released)
+HugePageFiller: at peak hps: 53502 pages (and 6146 free, 0 unmapped)
+HugePageFiller: at peak hps: 233 hps (233 regular, 0 donated, 0 partial, 0 released)
 
 HugePageFiller: Since the start of the execution, 0 subreleases (0 pages) were skipped due to recent (0s) peaks.
 HugePageFiller: 0.0000% of decisions confirmed correct, 0 pending (0.0000% of pages, 0 pending).
@@ -376,149 +370,133 @@ HugeRegionSet: 0 hugepages backed out of 0 total
 HugeRegionSet: 0 pages free in backed region, 0.0000 free
 
 HugeCache: contains unused, backed hugepage(s) (kCacheTime = 1000ms)
-HugeCache: 8 / 10 hugepages cached / cache limit (0.356 hit rate, 0.153 overflow rate)
-HugeCache: 116 MiB fast unbacked, 100 MiB periodic
-HugeCache: 875 MiB*s cached since startup
-HugeCache: recent usage range: 540 min - 540 curr -  540 max MiB
-HugeCache: recent offpeak range: 0 min - 0 curr - 0 max MiB
-HugeCache: recent cache range: 16 min - 16 curr - 16 max MiB
+HugeCache: 0 / 10 hugepages cached / cache limit (0.458 hit rate, 0.130 overflow rate)
+HugeCache: 88 MiB fast unbacked, 0 MiB periodic
+HugeCache: 885 MiB*s cached since startup
+HugeCache: recent usage range: 518 min - 534 curr -  534 max MiB
+HugeCache: recent offpeak range: 0 min - 0 curr - 6 max MiB
+HugeCache: recent cache range: 0 min - 0 curr - 16 max MiB
 
 HugeCache: window 1000ms * 600
-HugeCache: Usage timeseries 500:0:11,501:12:78,502:79:80,503:89:89,507:91:97,508:98:98,509:98:114,510:115:126,511:127:129,512:126:127,513:128:136,514:134:136,515:136:140,516:140:140,518:141:170,519:170:171,520:170:171,521:171:179,522:178:183,523:181:186,524:183:186,525:186:188,526:187:194,527:194:237,528:237:239,529:238:247,530:241:250,532:240:242,533:239:244,539:241:253,540:252:254,541:243:264,542:242:243,545:241:246,549:242:270,550:271:271,552:272:276,553:275:284,554:276:288,555:276:277,556:276:281,558:273:275,559:271:272,561:270:270,565:270:275,566:276:292,567:275:290,568:273:274,569:272:272,571:270:271,572:270:271,573:270:271,575:270:272,576:270:275,579:270:271,580:270:273,581:273:275,582:273:282,583:271:281,585:271:273,586:272:307,587:270:309,592:271:271,593:270:275,594:275:283,595:273:285,596:272:274,597:272:277,598:271:271,599:270:270,
+HugeCache: Usage timeseries 498:1:4,499:5:20,500:21:78,501:78:82,502:83:92,503:93:101,505:102:110,506:111:111,507:110:116,508:116:117,509:117:119,511:119:122,512:122:125,515:121:122,517:121:122,518:121:122,519:122:151,520:152:154,521:152:153,522:153:155,524:152:155,525:151:153,528:151:156,532:154:168,533:169:183,534:182:189,536:182:183,537:183:188,538:186:191,539:186:191,543:187:199,544:199:201,545:202:217,546:218:225,547:226:239,548:237:242,549:232:240,550:231:231,553:232:247,554:247:251,555:251:254,558:252:253,559:252:257,560:253:253,561:254:257,562:254:254,563:254:255,564:252:253,568:252:253,569:254:264,570:258:259,571:253:289,572:252:252,578:254:257,579:258:263,580:254:271,581:252:259,583:251:251,587:253:264,588:252:264,590:252:253,591:251:258,597:253:256,598:256:264,599:265:267,
 
 HugeAllocator: contiguous, unbacked hugepage(s)
-HugeAddressMap: treap 3 / 8 nodes used / created
-HugeAddressMap: 28 contiguous hugepages available
-HugeAllocator: 309 requested - 278 in use = 31 hugepages free
+HugeAddressMap: treap 4 / 6 nodes used / created
+HugeAddressMap: 14 contiguous hugepages available
+HugeAllocator: 289 requested - 267 in use = 22 hugepages free
 
 HugePageAware: stats on allocation sizes
-HugePageAware: 41690 pages live small allocation
-HugePageAware: 1036 pages of slack on large allocations
+HugePageAware: 44368 pages live small allocation
+HugePageAware: 1132 pages of slack on large allocations
 HugePageAware: largest seen allocation 3072 pages
 HugePageAware: per-size information:
-HugePageAware:                     1 page info:      70664 /      41942 a/f,    28722 ( 224.4 MiB) live,      706 allocs/s (   5.5 MiB/s)
-HugePageAware:                     2 page info:      22539 /      20055 a/f,     2484 (  38.8 MiB) live,      225 allocs/s (   3.5 MiB/s)
-HugePageAware:                     3 page info:       1338 /       1161 a/f,      177 (   4.1 MiB) live,     13.4 allocs/s (   0.3 MiB/s)
-HugePageAware:                     4 page info:       6846 /       6435 a/f,      411 (  12.8 MiB) live,     68.4 allocs/s (   2.1 MiB/s)
-HugePageAware:                     5 page info:        708 /        541 a/f,      167 (   6.5 MiB) live,     7.07 allocs/s (   0.3 MiB/s)
-HugePageAware:                     6 page info:        699 /        641 a/f,       58 (   2.7 MiB) live,     6.98 allocs/s (   0.3 MiB/s)
-HugePageAware:                     7 page info:        251 /        214 a/f,       37 (   2.0 MiB) live,     2.51 allocs/s (   0.1 MiB/s)
-HugePageAware:                     8 page info:       1076 /       1050 a/f,       26 (   1.6 MiB) live,     10.7 allocs/s (   0.7 MiB/s)
-HugePageAware:                     9 page info:        556 /        552 a/f,        4 (   0.3 MiB) live,     5.55 allocs/s (   0.4 MiB/s)
-HugePageAware:                    10 page info:         79 /         77 a/f,        2 (   0.2 MiB) live,    0.789 allocs/s (   0.1 MiB/s)
-HugePageAware:                    11 page info:         60 /         54 a/f,        6 (   0.5 MiB) live,    0.599 allocs/s (   0.1 MiB/s)
-HugePageAware:                    12 page info:        206 /        200 a/f,        6 (   0.6 MiB) live,     2.06 allocs/s (   0.2 MiB/s)
-HugePageAware:                    13 page info:         31 /         26 a/f,        5 (   0.5 MiB) live,     0.31 allocs/s (   0.0 MiB/s)
-HugePageAware:                    15 page info:         54 /         24 a/f,       30 (   3.5 MiB) live,    0.539 allocs/s (   0.1 MiB/s)
-HugePageAware:                    16 page info:       3291 /       3254 a/f,       37 (   4.6 MiB) live,     32.9 allocs/s (   4.1 MiB/s)
-HugePageAware:                    17 page info:          3 /          2 a/f,        1 (   0.1 MiB) live,     0.03 allocs/s (   0.0 MiB/s)
-HugePageAware:                    19 page info:         19 /         12 a/f,        7 (   1.0 MiB) live,     0.19 allocs/s (   0.0 MiB/s)
-HugePageAware:                    20 page info:         63 /         61 a/f,        2 (   0.3 MiB) live,    0.629 allocs/s (   0.1 MiB/s)
-HugePageAware:                    22 page info:         29 /         23 a/f,        6 (   1.0 MiB) live,     0.29 allocs/s (   0.0 MiB/s)
-HugePageAware:                    25 page info:         93 /         88 a/f,        5 (   1.0 MiB) live,    0.929 allocs/s (   0.2 MiB/s)
-HugePageAware:                    27 page info:         25 /         20 a/f,        5 (   1.1 MiB) live,     0.25 allocs/s (   0.1 MiB/s)
-HugePageAware:                    29 page info:          7 /          7 a/f,        0 (   0.0 MiB) live,   0.0699 allocs/s (   0.0 MiB/s)
-HugePageAware:                    32 page info:        767 /        736 a/f,       31 (   7.8 MiB) live,     7.66 allocs/s (   1.9 MiB/s)
-HugePageAware:                    33 page info:          4 /          3 a/f,        1 (   0.3 MiB) live,   0.0399 allocs/s (   0.0 MiB/s)
-HugePageAware:                    34 page info:          3 /          3 a/f,        0 (   0.0 MiB) live,     0.03 allocs/s (   0.0 MiB/s)
-HugePageAware:                    37 page info:          8 /          7 a/f,        1 (   0.3 MiB) live,   0.0799 allocs/s (   0.0 MiB/s)
-HugePageAware:                    40 page info:         62 /         57 a/f,        5 (   1.6 MiB) live,    0.619 allocs/s (   0.2 MiB/s)
-HugePageAware:                    41 page info:          9 /          8 a/f,        1 (   0.3 MiB) live,   0.0899 allocs/s (   0.0 MiB/s)
-HugePageAware:                    43 page info:          3 /          0 a/f,        3 (   1.0 MiB) live,     0.03 allocs/s (   0.0 MiB/s)
-HugePageAware:                    45 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0799 allocs/s (   0.0 MiB/s)
-HugePageAware:                    47 page info:          1 /          0 a/f,        1 (   0.4 MiB) live,  0.00999 allocs/s (   0.0 MiB/s)
-HugePageAware:                    48 page info:         43 /         41 a/f,        2 (   0.8 MiB) live,    0.429 allocs/s (   0.2 MiB/s)
-HugePageAware:                    51 page info:          4 /          3 a/f,        1 (   0.4 MiB) live,   0.0399 allocs/s (   0.0 MiB/s)
-HugePageAware:                    58 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0799 allocs/s (   0.0 MiB/s)
-HugePageAware:                    59 page info:         15 /         15 a/f,        0 (   0.0 MiB) live,     0.15 allocs/s (   0.1 MiB/s)
-HugePageAware:                    60 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00999 allocs/s (   0.0 MiB/s)
-HugePageAware:                    62 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00999 allocs/s (   0.0 MiB/s)
-HugePageAware:                    64 page info:        371 /        367 a/f,        4 (   2.0 MiB) live,      3.7 allocs/s (   1.9 MiB/s)
-HugePageAware:                    69 page info:         18 /         18 a/f,        0 (   0.0 MiB) live,     0.18 allocs/s (   0.1 MiB/s)
-HugePageAware:                    70 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0799 allocs/s (   0.0 MiB/s)
-HugePageAware:                    74 page info:          9 /          8 a/f,        1 (   0.6 MiB) live,   0.0899 allocs/s (   0.1 MiB/s)
-HugePageAware:                    80 page info:         17 /         16 a/f,        1 (   0.6 MiB) live,     0.17 allocs/s (   0.1 MiB/s)
-HugePageAware:                    81 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00999 allocs/s (   0.0 MiB/s)
-HugePageAware:                    96 page info:         21 /         21 a/f,        0 (   0.0 MiB) live,     0.21 allocs/s (   0.2 MiB/s)
-HugePageAware:                   101 page info:          3 /          3 a/f,        0 (   0.0 MiB) live,     0.03 allocs/s (   0.0 MiB/s)
-HugePageAware:                   116 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0799 allocs/s (   0.1 MiB/s)
-HugePageAware:                   128 page info:        129 /        127 a/f,        2 (   2.0 MiB) live,     1.29 allocs/s (   1.3 MiB/s)
-HugePageAware: [     129 ,     256 ] page info:         62 /         51 a/f,       11 (  20.7 MiB) live,    0.619 allocs/s (   1.0 MiB/s)
-HugePageAware: [     257 ,     512 ] page info:         39 /         35 a/f,        4 (  14.0 MiB) live,    0.389 allocs/s (   1.2 MiB/s)
-HugePageAware: [     513 ,    1024 ] page info:          9 /          7 a/f,        2 (  11.1 MiB) live,   0.0899 allocs/s (   0.5 MiB/s)
-HugePageAware: [    1025 ,    2048 ] page info:          7 /          5 a/f,        2 (  32.0 MiB) live,   0.0699 allocs/s (   0.9 MiB/s)
-HugePageAware: [    2049 ,    4096 ] page info:          2 /          1 a/f,        1 (  16.0 MiB) live,     0.02 allocs/s (   0.4 MiB/s)
+HugePageAware:                     1 page info:      84344 /      55816 a/f,    28528 ( 222.9 MiB) live,      839 allocs/s (   6.6 MiB/s)
+HugePageAware:                     2 page info:      42149 /      40051 a/f,     2098 (  32.8 MiB) live,      419 allocs/s (   6.6 MiB/s)
+HugePageAware:                     3 page info:       1910 /       1735 a/f,      175 (   4.1 MiB) live,       19 allocs/s (   0.4 MiB/s)
+HugePageAware:                     4 page info:      17418 /      17122 a/f,      296 (   9.2 MiB) live,      173 allocs/s (   5.4 MiB/s)
+HugePageAware:                     5 page info:        729 /        559 a/f,      170 (   6.6 MiB) live,     7.25 allocs/s (   0.3 MiB/s)
+HugePageAware:                     6 page info:        733 /        671 a/f,       62 (   2.9 MiB) live,     7.29 allocs/s (   0.3 MiB/s)
+HugePageAware:                     7 page info:        274 /        241 a/f,       33 (   1.8 MiB) live,     2.73 allocs/s (   0.1 MiB/s)
+HugePageAware:                     8 page info:       2773 /       2754 a/f,       19 (   1.2 MiB) live,     27.6 allocs/s (   1.7 MiB/s)
+HugePageAware:                     9 page info:        581 /        575 a/f,        6 (   0.4 MiB) live,     5.78 allocs/s (   0.4 MiB/s)
+HugePageAware:                    10 page info:         76 /         73 a/f,        3 (   0.2 MiB) live,    0.756 allocs/s (   0.1 MiB/s)
+HugePageAware:                    11 page info:         71 /         66 a/f,        5 (   0.4 MiB) live,    0.707 allocs/s (   0.1 MiB/s)
+HugePageAware:                    12 page info:        210 /        205 a/f,        5 (   0.5 MiB) live,     2.09 allocs/s (   0.2 MiB/s)
+HugePageAware:                    13 page info:         49 /         44 a/f,        5 (   0.5 MiB) live,    0.488 allocs/s (   0.0 MiB/s)
+HugePageAware:                    15 page info:         68 /         38 a/f,       30 (   3.5 MiB) live,    0.677 allocs/s (   0.1 MiB/s)
+HugePageAware:                    16 page info:       4269 /       3965 a/f,      304 (  38.0 MiB) live,     42.5 allocs/s (   5.3 MiB/s)
+HugePageAware:                    17 page info:         19 /         18 a/f,        1 (   0.1 MiB) live,    0.189 allocs/s (   0.0 MiB/s)
+HugePageAware:                    19 page info:         51 /         44 a/f,        7 (   1.0 MiB) live,    0.507 allocs/s (   0.1 MiB/s)
+HugePageAware:                    20 page info:         66 /         63 a/f,        3 (   0.5 MiB) live,    0.657 allocs/s (   0.1 MiB/s)
+HugePageAware:                    22 page info:         28 /         22 a/f,        6 (   1.0 MiB) live,    0.279 allocs/s (   0.0 MiB/s)
+HugePageAware:                    25 page info:        105 /        101 a/f,        4 (   0.8 MiB) live,     1.04 allocs/s (   0.2 MiB/s)
+HugePageAware:                    27 page info:         59 /         54 a/f,        5 (   1.1 MiB) live,    0.587 allocs/s (   0.1 MiB/s)
+HugePageAware:                    29 page info:         18 /         18 a/f,        0 (   0.0 MiB) live,    0.179 allocs/s (   0.0 MiB/s)
+HugePageAware:                    32 page info:       1218 /       1188 a/f,       30 (   7.5 MiB) live,     12.1 allocs/s (   3.0 MiB/s)
+HugePageAware:                    33 page info:         16 /         15 a/f,        1 (   0.3 MiB) live,    0.159 allocs/s (   0.0 MiB/s)
+HugePageAware:                    34 page info:          3 /          3 a/f,        0 (   0.0 MiB) live,   0.0299 allocs/s (   0.0 MiB/s)
+HugePageAware:                    35 page info:         18 /         18 a/f,        0 (   0.0 MiB) live,    0.179 allocs/s (   0.0 MiB/s)
+HugePageAware:                    37 page info:          4 /          4 a/f,        0 (   0.0 MiB) live,   0.0398 allocs/s (   0.0 MiB/s)
+HugePageAware:                    40 page info:         57 /         52 a/f,        5 (   1.6 MiB) live,    0.567 allocs/s (   0.2 MiB/s)
+HugePageAware:                    41 page info:          9 /          8 a/f,        1 (   0.3 MiB) live,   0.0896 allocs/s (   0.0 MiB/s)
+HugePageAware:                    43 page info:          3 /          0 a/f,        3 (   1.0 MiB) live,   0.0299 allocs/s (   0.0 MiB/s)
+HugePageAware:                    45 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0796 allocs/s (   0.0 MiB/s)
+HugePageAware:                    47 page info:          1 /          0 a/f,        1 (   0.4 MiB) live,  0.00995 allocs/s (   0.0 MiB/s)
+HugePageAware:                    48 page info:         49 /         47 a/f,        2 (   0.8 MiB) live,    0.488 allocs/s (   0.2 MiB/s)
+HugePageAware:                    51 page info:          4 /          3 a/f,        1 (   0.4 MiB) live,   0.0398 allocs/s (   0.0 MiB/s)
+HugePageAware:                    58 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0796 allocs/s (   0.0 MiB/s)
+HugePageAware:                    59 page info:         15 /         15 a/f,        0 (   0.0 MiB) live,    0.149 allocs/s (   0.1 MiB/s)
+HugePageAware:                    60 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00995 allocs/s (   0.0 MiB/s)
+HugePageAware:                    62 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00995 allocs/s (   0.0 MiB/s)
+HugePageAware:                    64 page info:        338 /        335 a/f,        3 (   1.5 MiB) live,     3.36 allocs/s (   1.7 MiB/s)
+HugePageAware:                    69 page info:         16 /         16 a/f,        0 (   0.0 MiB) live,    0.159 allocs/s (   0.1 MiB/s)
+HugePageAware:                    70 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0796 allocs/s (   0.0 MiB/s)
+HugePageAware:                    74 page info:          8 /          7 a/f,        1 (   0.6 MiB) live,   0.0796 allocs/s (   0.0 MiB/s)
+HugePageAware:                    80 page info:         18 /         18 a/f,        0 (   0.0 MiB) live,    0.179 allocs/s (   0.1 MiB/s)
+HugePageAware:                    81 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00995 allocs/s (   0.0 MiB/s)
+HugePageAware:                    96 page info:         25 /         24 a/f,        1 (   0.8 MiB) live,    0.249 allocs/s (   0.2 MiB/s)
+HugePageAware:                   101 page info:          3 /          3 a/f,        0 (   0.0 MiB) live,   0.0299 allocs/s (   0.0 MiB/s)
+HugePageAware:                   116 page info:          8 /          8 a/f,        0 (   0.0 MiB) live,   0.0796 allocs/s (   0.1 MiB/s)
+HugePageAware:                   128 page info:        122 /        120 a/f,        2 (   2.0 MiB) live,     1.21 allocs/s (   1.2 MiB/s)
+HugePageAware: [     129 ,     256 ] page info:         63 /         51 a/f,       12 (  22.0 MiB) live,    0.627 allocs/s (   1.0 MiB/s)
+HugePageAware: [     257 ,     512 ] page info:         38 /         34 a/f,        4 (  14.0 MiB) live,    0.378 allocs/s (   1.2 MiB/s)
+HugePageAware: [     513 ,    1024 ] page info:          9 /          7 a/f,        2 (  11.1 MiB) live,   0.0896 allocs/s (   0.5 MiB/s)
+HugePageAware: [    1025 ,    2048 ] page info:          7 /          4 a/f,        3 (  44.0 MiB) live,   0.0697 allocs/s (   0.9 MiB/s)
+HugePageAware: [    2049 ,    4096 ] page info:          2 /          1 a/f,        1 (  16.0 MiB) live,   0.0199 allocs/s (   0.4 MiB/s)
 ------------------------------------------------
 HugePageAware cache entry age (count of pages in spans of a given size that have been idle for up to the given period of time)
 ------------------------------------------------
                                  mean     <1s      1s     30s      1m     30m      1h     8+h
-Live span       TOTAL PAGES:      7.9    2297   15161       0       0       0       0       0
-Live span,          1 pages:      9.0      11    1750       0       0       0       0       0
-Live span,          2 pages:      7.8      20    2418       0       0       0       0       0
-Live span,          3 pages:     10.0       9    1095       0       0       0       0       0
-Live span,          4 pages:      9.2      32    2224       0       0       0       0       0
-Live span,          5 pages:      9.8      10    1085       0       0       0       0       0
-Live span,          6 pages:     10.4       0    1224       0       0       0       0       0
-Live span,          7 pages:     10.7       0     651       0       0       0       0       0
-Live span,          8 pages:      9.9       8     776       0       0       0       0       0
-Live span,          9 pages:      9.0      18     504       0       0       0       0       0
-Live span,         10 pages:     10.7      10     530       0       0       0       0       0
-Live span,         11 pages:     10.7       0     352       0       0       0       0       0
-Live span,         12 pages:     10.4       0     336       0       0       0       0       0
-Live span,         13 pages:     11.9       0     247       0       0       0       0       0
-Live span,         14 pages:     10.6       0     182       0       0       0       0       0
-Live span,         15 pages:      7.4      15     135       0       0       0       0       0
-Live span,         16 pages:      8.2       0      80       0       0       0       0       0
-Live span,         17 pages:     10.0       0     102       0       0       0       0       0
-Live span,         18 pages:      8.3      18      90       0       0       0       0       0
-Live span,         19 pages:      8.9       0      19       0       0       0       0       0
-Live span,         20 pages:      9.9       0      40       0       0       0       0       0
-Live span,         21 pages:     11.8       0      42       0       0       0       0       0
-Live span,         22 pages:      7.2       0      22       0       0       0       0       0
-Live span,         24 pages:      9.6       0      48       0       0       0       0       0
-Live span,         25 pages:      3.9       0      50       0       0       0       0       0
-Live span,         26 pages:      8.0       0      52       0       0       0       0       0
-Live span,         28 pages:     10.1       0      56       0       0       0       0       0
-Live span,         30 pages:      0.9      30       0       0       0       0       0       0
-Live span,         31 pages:     12.5       0      31       0       0       0       0       0
-Live span,         34 pages:      2.1       0      34       0       0       0       0       0
-Live span,         35 pages:      1.3       0      35       0       0       0       0       0
-Live span,         38 pages:      2.2       0      76       0       0       0       0       0
-Live span,         42 pages:      3.9       0      42       0       0       0       0       0
-Live span,         56 pages:      3.5       0      56       0       0       0       0       0
-Live span,       >=64 pages:      1.3    2116     777       0       0       0       0       0
+Live span       TOTAL PAGES:      3.3     684    9584       0       0       0       0       0
+Live span,          1 pages:      2.7     122    2331       0       0       0       0       0
+Live span,          2 pages:      3.2     214    1710       0       0       0       0       0
+Live span,          3 pages:      3.7      51     726       0       0       0       0       0
+Live span,          4 pages:      2.9      28    1760       0       0       0       0       0
+Live span,          5 pages:      3.3       5     860       0       0       0       0       0
+Live span,          6 pages:      3.7       6     498       0       0       0       0       0
+Live span,          7 pages:      4.6       7     238       0       0       0       0       0
+Live span,          8 pages:      3.7      48     480       0       0       0       0       0
+Live span,          9 pages:      4.8      27     198       0       0       0       0       0
+Live span,         10 pages:      3.2       0     200       0       0       0       0       0
+Live span,         11 pages:      4.7       0     143       0       0       0       0       0
+Live span,         12 pages:      6.6       0     120       0       0       0       0       0
+Live span,         13 pages:      9.2       0      91       0       0       0       0       0
+Live span,         14 pages:      7.0       0     154       0       0       0       0       0
+Live span,         15 pages:      6.1       0      75       0       0       0       0       0
+Live span,         16 pages:      0.2      32       0       0       0       0       0       0
+Live span,       >=64 pages:      0.1     144       0       0       0       0       0       0
 
-Unmapped span   TOTAL PAGES:     10.8     256    7680       0       0       0       0       0
-Unmapped span,   >=64 pages:     10.8     256    7680       0       0       0       0       0
+Unmapped span   TOTAL PAGES:      6.6       0    5632       0       0       0       0       0
+Unmapped span,   >=64 pages:      6.6       0    5632       0       0       0       0       0
 PARAMETER hpaa_subrelease 0
 
 >>>>>>> Begin tagged page allocator <<<<<<<
 ------------------------------------------------
-HugePageAware: 8 sizes;    3.3 MiB free;    2.0 MiB unmapped
+HugePageAware: 8 sizes;    3.4 MiB free;    0.0 MiB unmapped
 ------------------------------------------------
-     2 pages *      2 spans ~    0.0 MiB;    0.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     3 pages *      1 spans ~    0.0 MiB;    0.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     4 pages *      1 spans ~    0.0 MiB;    0.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-     8 pages *      2 spans ~    0.1 MiB;    0.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    16 pages *      3 spans ~    0.4 MiB;    0.6 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    25 pages *      1 spans ~    0.2 MiB;    0.8 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    28 pages *      1 spans ~    0.2 MiB;    1.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
-    38 pages *      1 spans ~    0.3 MiB;    1.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
- >=128 large *      2 spans ~    4.0 MiB;    5.3 MiB cum; unmapped:    2.0 MiB;    2.0 MiB cum
+     1 pages *      2 spans ~    0.0 MiB;    0.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     2 pages *      1 spans ~    0.0 MiB;    0.0 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     3 pages *      5 spans ~    0.1 MiB;    0.1 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     4 pages *      2 spans ~    0.1 MiB;    0.2 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     5 pages *      3 spans ~    0.1 MiB;    0.3 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     6 pages *      2 spans ~    0.1 MiB;    0.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+     8 pages *      2 spans ~    0.1 MiB;    0.5 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+   103 pages *      1 spans ~    0.8 MiB;    1.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
+ >=128 large *      1 spans ~    2.0 MiB;    3.4 MiB cum; unmapped:    0.0 MiB;    0.0 MiB cum
 
 Huge page aware allocator components:
 ------------------------------------------------
 HugePageAware: breakdown of used / free / unmapped space:
-HugePageAware: filler    2.7 MiB used,    1.3 MiB free,    0.0 MiB unmapped
+HugePageAware: filler    4.6 MiB used,    1.4 MiB free,    0.0 MiB unmapped
 HugePageAware: region    0.0 MiB used,    0.0 MiB free,    0.0 MiB unmapped
 HugePageAware: cache     0.0 MiB used,    2.0 MiB free,    0.0 MiB unmapped
-HugePageAware: alloc     0.0 MiB used,    0.0 MiB free,    2.0 MiB unmapped
+HugePageAware: alloc     0.0 MiB used,    0.0 MiB free,    0.0 MiB unmapped
 
 HugePageAware: filler donations 0
 HugePageFiller: densely pack small requests into hugepages
-HugePageFiller: 2 total, 0 full, 2 partial, 0 released (0 partially), 0 quarantined
-HugePageFiller: 166 pages free in 2 hugepages, 0.3242 free
-HugePageFiller: among non-fulls, 0.3242 free
+HugePageFiller: 3 total, 0 full, 3 partial, 0 released (0 partially), 0 quarantined
+HugePageFiller: 173 pages free in 3 hugepages, 0.2253 free
+HugePageFiller: among non-fulls, 0.2253 free
 HugePageFiller: 0 used pages in subreleased hugepages (0 of them in partially released)
 HugePageFiller: 0 hugepages partially released, 0.0000 released
 HugePageFiller: 1.0000 of used pages hugepageable
@@ -527,9 +505,9 @@ HugePageFiller: Since startup, 0 pages subreleased, 0 hugepages broken, (0 pages
 HugePageFiller: fullness histograms
 
 HugePageFiller: # of regular hps with a<= # of free pages <b
-HugePageFiller: <  0<=     0 <  1<=     0 <  2<=     0 <  3<=     1 <  4<=     0 < 16<=     0
-HugePageFiller: < 32<=     0 < 48<=     0 < 64<=     0 < 80<=     0 < 96<=     0 <112<=     0
-HugePageFiller: <128<=     0 <144<=     0 <160<=     1 <176<=     0 <192<=     0 <208<=     0
+HugePageFiller: <  0<=     0 <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     1 < 16<=     0
+HugePageFiller: < 32<=     0 < 48<=     1 < 64<=     0 < 80<=     0 < 96<=     1 <112<=     0
+HugePageFiller: <128<=     0 <144<=     0 <160<=     0 <176<=     0 <192<=     0 <208<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of donated hps with a<= # of free pages <b
@@ -551,8 +529,8 @@ HugePageFiller: <128<=     0 <144<=     0 <160<=     0 <176<=     0 <192<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of regular hps with a<= longest free range <b
-HugePageFiller: <  0<=     0 <  1<=     0 <  2<=     0 <  3<=     1 <  4<=     0 < 16<=     0
-HugePageFiller: < 32<=     1 < 48<=     0 < 64<=     0 < 80<=     0 < 96<=     0 <112<=     0
+HugePageFiller: <  0<=     0 <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     2 < 16<=     0
+HugePageFiller: < 32<=     0 < 48<=     0 < 64<=     0 < 80<=     0 < 96<=     1 <112<=     0
 HugePageFiller: <128<=     0 <144<=     0 <160<=     0 <176<=     0 <192<=     0 <208<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
@@ -569,8 +547,8 @@ HugePageFiller: <128<=     0 <144<=     0 <160<=     0 <176<=     0 <192<=     0
 HugePageFiller: <224<=     0 <240<=     0 <252<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: # of regular hps with a<= # of allocations <b
-HugePageFiller: <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     0 <  5<=     0 < 17<=     0
-HugePageFiller: < 33<=     0 < 49<=     2 < 65<=     0 < 81<=     0 < 97<=     0 <113<=     0
+HugePageFiller: <  1<=     0 <  2<=     0 <  3<=     0 <  4<=     0 <  5<=     1 < 17<=     0
+HugePageFiller: < 33<=     1 < 49<=     0 < 65<=     0 < 81<=     1 < 97<=     0 <113<=     0
 HugePageFiller: <129<=     0 <145<=     0 <161<=     0 <177<=     0 <193<=     0 <209<=     0
 HugePageFiller: <225<=     0 <241<=     0 <253<=     0 <254<=     0 <255<=     0 <256<=     0
 
@@ -588,10 +566,10 @@ HugePageFiller: <225<=     0 <241<=     0 <253<=     0 <254<=     0 <255<=     0
 
 HugePageFiller: time series over 5 min interval
 
-HugePageFiller: minimum free pages: 0 (0 backed)
-HugePageFiller: at peak demand: 844 pages (and 180 free, 0 unmapped)
+HugePageFiller: minimum free pages: 1 (1 backed)
+HugePageFiller: at peak demand: 959 pages (and 65 free, 0 unmapped)
 HugePageFiller: at peak demand: 4 hps (4 regular, 0 donated, 0 partial, 0 released)
-HugePageFiller: at peak hps: 844 pages (and 180 free, 0 unmapped)
+HugePageFiller: at peak hps: 959 pages (and 65 free, 0 unmapped)
 HugePageFiller: at peak hps: 4 hps (4 regular, 0 donated, 0 partial, 0 released)
 
 HugePageFiller: Since the start of the execution, 0 subreleases (0 pages) were skipped due to recent (0s) peaks.
@@ -604,65 +582,63 @@ HugeRegionSet: 0 hugepages backed out of 0 total
 HugeRegionSet: 0 pages free in backed region, 0.0000 free
 
 HugeCache: contains unused, backed hugepage(s) (kCacheTime = 1000ms)
-HugeCache: 1 / 10 hugepages cached / cache limit (0.825 hit rate, 0.000 overflow rate)
-HugeCache: 0 MiB fast unbacked, 8 MiB periodic
-HugeCache: 126 MiB*s cached since startup
-HugeCache: recent usage range: 4 min - 4 curr -  4 max MiB
+HugeCache: 1 / 10 hugepages cached / cache limit (0.938 hit rate, 0.000 overflow rate)
+HugeCache: 0 MiB fast unbacked, 0 MiB periodic
+HugeCache: 115 MiB*s cached since startup
+HugeCache: recent usage range: 6 min - 6 curr -  6 max MiB
 HugeCache: recent offpeak range: 0 min - 0 curr - 0 max MiB
 HugeCache: recent cache range: 2 min - 2 curr - 2 max MiB
 
 HugeCache: window 1000ms * 600
-HugeCache: Usage timeseries 500:1:1,508:2:2,518:2:3,527:2:3,530:2:3,537:2:3,539:3:3,541:2:4,548:2:3,549:2:3,554:3:4,571:2:3,572:2:3,573:2:3,574:2:3,575:3:3,586:4:4,587:3:3,593:2:3,594:3:3,595:2:2,596:2:3,597:2:3,598:2:3,599:2:3,
+HugeCache: Usage timeseries 500:1:1,502:1:2,503:1:2,535:2:3,536:2:3,540:2:3,548:2:3,549:3:3,551:2:2,553:2:3,554:2:3,555:2:3,559:2:3,560:2:3,561:2:3,564:2:3,565:2:3,571:3:3,573:3:4,574:2:2,576:2:3,581:3:3,582:2:2,587:2:3,588:2:3,589:3:3,590:2:2,592:2:3,593:2:3,594:2:3,595:2:3,597:2:3,599:3:3,
 
 HugeAllocator: contiguous, unbacked hugepage(s)
-HugeAddressMap: treap 1 / 1 nodes used / created
-HugeAddressMap: 1 contiguous hugepages available
-HugeAllocator: 4 requested - 3 in use = 1 hugepages free
+HugeAddressMap: treap 0 / 1 nodes used / created
+HugeAddressMap: 0 contiguous hugepages available
+HugeAllocator: 4 requested - 4 in use = 0 hugepages free
 
 HugePageAware: stats on allocation sizes
-HugePageAware: 346 pages live small allocation
+HugePageAware: 595 pages live small allocation
 HugePageAware: 0 pages of slack on large allocations
 HugePageAware: largest seen allocation 32 pages
 HugePageAware: per-size information:
-HugePageAware:                     1 page info:       2311 /       2224 a/f,       87 (   0.7 MiB) live,     23.1 allocs/s (   0.2 MiB/s)
-HugePageAware:                     2 page info:        322 /        320 a/f,        2 (   0.0 MiB) live,     3.22 allocs/s (   0.1 MiB/s)
-HugePageAware:                     3 page info:         35 /         35 a/f,        0 (   0.0 MiB) live,    0.349 allocs/s (   0.0 MiB/s)
-HugePageAware:                     4 page info:        623 /        618 a/f,        5 (   0.2 MiB) live,     6.22 allocs/s (   0.2 MiB/s)
-HugePageAware:                     5 page info:         14 /         13 a/f,        1 (   0.0 MiB) live,     0.14 allocs/s (   0.0 MiB/s)
-HugePageAware:                     6 page info:         32 /         31 a/f,        1 (   0.0 MiB) live,     0.32 allocs/s (   0.0 MiB/s)
-HugePageAware:                     7 page info:         12 /         12 a/f,        0 (   0.0 MiB) live,     0.12 allocs/s (   0.0 MiB/s)
-HugePageAware:                     8 page info:        471 /        470 a/f,        1 (   0.1 MiB) live,      4.7 allocs/s (   0.3 MiB/s)
-HugePageAware:                     9 page info:         19 /         18 a/f,        1 (   0.1 MiB) live,     0.19 allocs/s (   0.0 MiB/s)
-HugePageAware:                    10 page info:         35 /         35 a/f,        0 (   0.0 MiB) live,    0.349 allocs/s (   0.0 MiB/s)
-HugePageAware:                    11 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00999 allocs/s (   0.0 MiB/s)
-HugePageAware:                    12 page info:         14 /         13 a/f,        1 (   0.1 MiB) live,     0.14 allocs/s (   0.0 MiB/s)
-HugePageAware:                    13 page info:          3 /          3 a/f,        0 (   0.0 MiB) live,     0.03 allocs/s (   0.0 MiB/s)
-HugePageAware:                    15 page info:          2 /          2 a/f,        0 (   0.0 MiB) live,     0.02 allocs/s (   0.0 MiB/s)
-HugePageAware:                    16 page info:        605 /        602 a/f,        3 (   0.4 MiB) live,     6.04 allocs/s (   0.8 MiB/s)
-HugePageAware:                    19 page info:          2 /          1 a/f,        1 (   0.1 MiB) live,     0.02 allocs/s (   0.0 MiB/s)
-HugePageAware:                    20 page info:          9 /          9 a/f,        0 (   0.0 MiB) live,   0.0899 allocs/s (   0.0 MiB/s)
-HugePageAware:                    22 page info:          2 /          2 a/f,        0 (   0.0 MiB) live,     0.02 allocs/s (   0.0 MiB/s)
-HugePageAware:                    25 page info:          7 /          7 a/f,        0 (   0.0 MiB) live,   0.0699 allocs/s (   0.0 MiB/s)
-HugePageAware:                    27 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00999 allocs/s (   0.0 MiB/s)
-HugePageAware:                    29 page info:          2 /          2 a/f,        0 (   0.0 MiB) live,     0.02 allocs/s (   0.0 MiB/s)
-HugePageAware:                    32 page info:        268 /        264 a/f,        4 (   1.0 MiB) live,     2.68 allocs/s (   0.7 MiB/s)
+HugePageAware:                     1 page info:       2315 /       2218 a/f,       97 (   0.8 MiB) live,       23 allocs/s (   0.2 MiB/s)
+HugePageAware:                     2 page info:        308 /        306 a/f,        2 (   0.0 MiB) live,     3.06 allocs/s (   0.0 MiB/s)
+HugePageAware:                     3 page info:         44 /         42 a/f,        2 (   0.0 MiB) live,    0.438 allocs/s (   0.0 MiB/s)
+HugePageAware:                     4 page info:        564 /        561 a/f,        3 (   0.1 MiB) live,     5.61 allocs/s (   0.2 MiB/s)
+HugePageAware:                     5 page info:         18 /         17 a/f,        1 (   0.0 MiB) live,    0.179 allocs/s (   0.0 MiB/s)
+HugePageAware:                     6 page info:         25 /         25 a/f,        0 (   0.0 MiB) live,    0.249 allocs/s (   0.0 MiB/s)
+HugePageAware:                     7 page info:         16 /         15 a/f,        1 (   0.1 MiB) live,    0.159 allocs/s (   0.0 MiB/s)
+HugePageAware:                     8 page info:        412 /        412 a/f,        0 (   0.0 MiB) live,      4.1 allocs/s (   0.3 MiB/s)
+HugePageAware:                     9 page info:         33 /         33 a/f,        0 (   0.0 MiB) live,    0.328 allocs/s (   0.0 MiB/s)
+HugePageAware:                    10 page info:         30 /         30 a/f,        0 (   0.0 MiB) live,    0.299 allocs/s (   0.0 MiB/s)
+HugePageAware:                    11 page info:          5 /          3 a/f,        2 (   0.2 MiB) live,   0.0498 allocs/s (   0.0 MiB/s)
+HugePageAware:                    12 page info:         13 /         12 a/f,        1 (   0.1 MiB) live,    0.129 allocs/s (   0.0 MiB/s)
+HugePageAware:                    13 page info:          1 /          1 a/f,        0 (   0.0 MiB) live,  0.00995 allocs/s (   0.0 MiB/s)
+HugePageAware:                    15 page info:          4 /          3 a/f,        1 (   0.1 MiB) live,   0.0398 allocs/s (   0.0 MiB/s)
+HugePageAware:                    16 page info:        538 /        525 a/f,       13 (   1.6 MiB) live,     5.35 allocs/s (   0.7 MiB/s)
+HugePageAware:                    19 page info:          4 /          4 a/f,        0 (   0.0 MiB) live,   0.0398 allocs/s (   0.0 MiB/s)
+HugePageAware:                    20 page info:          4 /          4 a/f,        0 (   0.0 MiB) live,   0.0398 allocs/s (   0.0 MiB/s)
+HugePageAware:                    22 page info:          3 /          2 a/f,        1 (   0.2 MiB) live,   0.0299 allocs/s (   0.0 MiB/s)
+HugePageAware:                    25 page info:         13 /         12 a/f,        1 (   0.2 MiB) live,    0.129 allocs/s (   0.0 MiB/s)
+HugePageAware:                    27 page info:         11 /         11 a/f,        0 (   0.0 MiB) live,    0.109 allocs/s (   0.0 MiB/s)
+HugePageAware:                    29 page info:          5 /          5 a/f,        0 (   0.0 MiB) live,   0.0498 allocs/s (   0.0 MiB/s)
+HugePageAware:                    32 page info:        285 /        280 a/f,        5 (   1.2 MiB) live,     2.84 allocs/s (   0.7 MiB/s)
 ------------------------------------------------
 HugePageAware cache entry age (count of pages in spans of a given size that have been idle for up to the given period of time)
 ------------------------------------------------
                                  mean     <1s      1s     30s      1m     30m      1h     8+h
-Live span       TOTAL PAGES:      1.3       3     419       0       0       0       0       0
-Live span,          2 pages:      1.5       0       4       0       0       0       0       0
-Live span,          3 pages:      0.5       3       0       0       0       0       0       0
-Live span,          4 pages:      1.5       0       4       0       0       0       0       0
-Live span,          8 pages:      1.5       0      16       0       0       0       0       0
-Live span,         16 pages:      1.5       0      48       0       0       0       0       0
-Live span,         25 pages:      1.5       0      25       0       0       0       0       0
-Live span,         28 pages:      1.5       0      28       0       0       0       0       0
-Live span,         38 pages:      1.5       0      38       0       0       0       0       0
-Live span,       >=64 pages:      1.3       0     256       0       0       0       0       0
+Live span       TOTAL PAGES:      1.2      10     419       0       0       0       0       0
+Live span,          1 pages:      0.7       1       1       0       0       0       0       0
+Live span,          2 pages:      1.1       0       2       0       0       0       0       0
+Live span,          3 pages:      0.9       3      12       0       0       0       0       0
+Live span,          4 pages:      1.1       0       8       0       0       0       0       0
+Live span,          5 pages:      1.1       0      15       0       0       0       0       0
+Live span,          6 pages:      0.7       6       6       0       0       0       0       0
+Live span,          8 pages:      1.1       0      16       0       0       0       0       0
+Live span,       >=64 pages:      1.2       0     359       0       0       0       0       0
 
-Unmapped span   TOTAL PAGES:      6.1       0     256       0       0       0       0       0
-Unmapped span,   >=64 pages:      6.1       0     256       0       0       0       0       0
+Unmapped span   TOTAL PAGES:      0.0       0       0       0       0       0       0       0
 PARAMETER hpaa_subrelease 0
 >>>>>>> End tagged page allocator <<<<<<<
 
@@ -680,7 +656,7 @@ Number of times limit was hit: 0
 PARAMETER tcmalloc_per_cpu_caches 1
 PARAMETER tcmalloc_max_per_cpu_cache_size 3145728
 PARAMETER tcmalloc_max_total_thread_cache_bytes 33554432
-PARAMETER malloc_release_bytes_per_sec 1048576
+PARAMETER malloc_release_bytes_per_sec 0
 PARAMETER tcmalloc_skip_subrelease_interval 0
 PARAMETER flat vcpus 0
 

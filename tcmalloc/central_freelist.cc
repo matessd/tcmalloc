@@ -41,13 +41,16 @@ static Span* MapObjectToSpan(void* object) {
 
 Span* CentralFreeList::ReleaseToSpans(void* object, Span* span) {
   if (span->FreelistEmpty()) {
+  #ifdef TCMALLOC_TRACK_SPAN_LIFE
+    // sun: remove from empty_
+    span->RemoveFromList();
+  #endif
   #ifdef TCMALLOC_LOW_ADDRESS_FIRST
     nonempty_.insert(span);
   #else
     nonempty_.prepend(span);
   #endif
   }
-
   if (span->FreelistPush(object, object_size_)) {
     return nullptr;
   }
@@ -123,6 +126,9 @@ int CentralFreeList::RemoveRange(void** batch, int N) {
     ASSERT(here > 0);
     if (span->FreelistEmpty()) {
       span->RemoveFromList();  // from nonempty_
+    #ifdef TCMALLOC_TRACK_SPAN_LIFE
+      empty_.prepend(span);
+    #endif
     }
     result += here;
   }
@@ -210,7 +216,38 @@ void CentralFreeList::ReleaseSpans() {
     }
   }
   lock_.Unlock();
-  //Log(kLog, __FILE__, __LINE__, object_size_, length()/objects_per_span_);
+  return;
+}
+
+void inline CentralFreeList::Internal_UpdateSpanLife(HpMap &hpMap, SpanList &list){
+  if(list.empty()){
+    return;
+  }
+  lock_.Lock();
+  auto iter = list.begin();
+  Span *cur = NULL;
+  size_t life = 0; uintptr_t hp_id = 0;
+  while(iter!=list.end()){
+    Span *cur = *iter;
+    life=cur->UpdateAndGetLife();
+    hp_id = cur->first_page().index()>>(kHugePageShift - kPageShift);
+    if(hpMap.find(hp_id)==hpMap.end()){
+      ++iter;
+      continue;
+    }
+    if(hpMap[hp_id]<life){
+      hpMap[hp_id] = life;
+    }
+    ++iter;
+  }
+  lock_.Unlock();
+}
+
+void CentralFreeList::UpdateSpanLife(HpMap &hpMap) {
+#ifdef TCMALLOC_TRACK_SPAN_LIFE
+  Internal_UpdateSpanLife(hpMap, nonempty_);
+  Internal_UpdateSpanLife(hpMap, empty_);
+#endif
   return;
 }
 

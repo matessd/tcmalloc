@@ -295,7 +295,7 @@ common_deps = [
     "//tcmalloc/internal:declarations",
     "//tcmalloc/internal:environment",
     "//tcmalloc/internal:linked_list",
-    "//tcmalloc/internal:sorted_list",
+    "//tcmalloc/internal:my_stl",
     "//tcmalloc/internal:logging",
     "//tcmalloc/internal:mincore",
     "//tcmalloc/internal:parameter_accessors",

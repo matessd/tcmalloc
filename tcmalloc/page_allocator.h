@@ -88,6 +88,7 @@ class PageAllocator {
   const PageAllocInfo& info(bool tagged) const
       ABSL_EXCLUSIVE_LOCKS_REQUIRED(pageheap_lock);
   
+  // sun: only needs to get tagged pageheap
   void getHugePages(uintptr_t *array, int &offset, int max_size);
 
   enum Algorithm {
@@ -199,9 +200,9 @@ inline const PageAllocInfo& PageAllocator::info(bool tagged) const {
 }
 
 inline void PageAllocator::getHugePages(uintptr_t *array, int &offset, int max_size){
-  HugePageAwareAllocator* tmp_impl =  (HugePageAwareAllocator*)impl(true);
-  tmp_impl->getHugePages(array, offset, max_size);
-  tmp_impl =  (HugePageAwareAllocator*)impl(false);
+  HugePageAwareAllocator* tmp_impl =  (HugePageAwareAllocator*)impl(false);
+  //tmp_impl->getHugePages(array, offset, max_size);
+  //tmp_impl =  (HugePageAwareAllocator*)impl(false);
   tmp_impl->getHugePages(array, offset, max_size);
 }
 

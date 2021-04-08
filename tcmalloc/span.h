@@ -26,8 +26,8 @@
 #include "tcmalloc/internal/linked_list.h"
 #include "tcmalloc/internal/logging.h"
 #include "tcmalloc/pages.h"
-
-#include "tcmalloc/internal/sorted_list.h"
+//sun
+#include "tcmalloc/internal/my_stl.h"
 
 namespace tcmalloc {
 
@@ -53,9 +53,13 @@ namespace tcmalloc {
 //    and is on returned PageHeap list.
 //    location_ == ON_RETURNED_FREELIST.
 class Span;
-//typedef TList<Span> SpanList;
 class SpanGreaterCmp;
+class SpanLessCmp;
+#ifdef TCMALLOC_LOW_ADDRESS_FIRST
 typedef TSortedList<Span, SpanGreaterCmp> SpanList;
+#else
+typedef TList<Span> SpanList;
+#endif
 
 class Span : public SpanList::Elem {
  public:
@@ -158,6 +162,10 @@ class Span : public SpanList::Elem {
   // Sun: Is all objects back to this span?
   bool IsTotalFree() const;
 
+#ifdef TCMALLOC_TRACK_SPAN_LIFE
+  size_t UpdateAndGetLife();
+#endif
+
   // Pushes ptr onto freelist unless the freelist becomes full,
   // in which case just return false.
   bool FreelistPush(void* ptr, size_t size);
@@ -213,6 +221,9 @@ class Span : public SpanList::Elem {
 
   PageId first_page_;  // Starting page number.
   Length num_pages_;   // Number of pages in span.
+#ifdef TCMALLOC_TRACK_SPAN_LIFE
+  size_t life_; // time has already been existed
+#endif
 
   // Convert object pointer <-> freelist index.
   ObjIdx PtrToIdx(void* ptr, size_t size) const;
@@ -344,6 +355,12 @@ inline bool Span::IsTotalFree() const {
   return allocated_ == 0;
 }
 
+#ifdef TCMALLOC_TRACK_SPAN_LIFE
+inline size_t Span::UpdateAndGetLife(){
+  return ++life_;
+}
+#endif
+
 inline void Span::RemoveFromList() { SpanList::Elem::remove(); }
 
 inline void Span::Prefetch() {
@@ -361,7 +378,9 @@ inline void Span::Prefetch() {
 #else
   // The Span can occupy two cache lines, so prefetch the cacheline with the
   // most frequently accessed parts of the Span.
+  #ifndef TCMALLOC_TRACK_SPAN_LIFE
   static_assert(sizeof(Span) == 48, "Update span prefetch offset");
+  #endif
   __builtin_prefetch(&this->allocated_, 0, 3);
 #endif
 #endif
@@ -377,12 +396,22 @@ inline void Span::Init(PageId p, Length n) {
   num_pages_ = n;
   location_ = IN_USE;
   sampled_ = 0;
+#ifdef TCMALLOC_TRACK_SPAN_LIFE
+  life_ = 0;
+#endif
 }
 
 class SpanGreaterCmp{
  public:
   bool operator()(Span *x, Span *y) const{
     return x->first_page() > y->first_page();
+  }
+};
+
+class SpanLessCmp{
+ public:
+  bool operator()(Span *x, Span *y) const{
+    return x->first_page() < y->first_page();
   }
 };
 

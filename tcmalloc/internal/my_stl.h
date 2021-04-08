@@ -7,8 +7,13 @@
 #include "absl/base/attributes.h"
 #include "absl/base/optimization.h"
 #include "tcmalloc/internal/logging.h"
+#include <set>
+#include <map>
 
 namespace tcmalloc {
+// sun:
+typedef std::set<uintptr_t> HpSet;
+typedef std::map<uintptr_t,size_t> HpMap;
 
 // A well-typed and sorted intrusive doubly linked list.
 template <typename T, typename Comp>
@@ -150,4 +155,4 @@ class TSortedList {
 
 }  // namespace tcmalloc
 
-#endif  // TCMALLOC_INTERNAL_LINKED_LIST_H_
+#endif  // TCMALLOC_INTERNAL_ALGORITHM_H_

@@ -37,7 +37,7 @@
 namespace tcmalloc {
 
 //#ifndef TCMALLOC_SMALL_BUT_SLOW
-#if (!defined TCMALLOC_SMALL_BUT_SLOW) && (!defined TCMALLOC_LOW_ADDRESS_FIRST)
+#if (!defined TCMALLOC_SMALL_BUT_SLOW)&&(!defined TCMALLOC_TRANSFER_OFF)
 
 class TransferCacheManager {
   template <typename CentralFreeList, typename Manager>
@@ -102,6 +102,14 @@ class TransferCacheManager {
       return cache_[size_class].lock_free.ReleaseCentral();
     else
       return cache_[size_class].legacy.ReleaseCentral();
+  }
+
+  // Sun
+  void UpdateSpanLife(HpMap &hpMap, int size_class){
+    if (use_lock_free_cache_)
+      return cache_[size_class].lock_free.UpdateSpanLife(hpMap);
+    else
+      return cache_[size_class].legacy.UpdateSpanLife(hpMap);
   }
 
   size_t tc_length(int size_class) {
@@ -189,6 +197,11 @@ class TransferCacheManager {
   // Sun: release related central freelist spans
   void ReleaseCentral(int size_class) {
     return freelist_[size_class].ReleaseSpans();
+  }
+  
+  // Sun
+  void UpdateSpanLife(HpMap &hpMap, int size_class){
+    return freelist_[size_class].UpdateSpanLife(hpMap);
   }
 
   size_t central_length(int size_class) {

@@ -250,6 +250,10 @@ class TransferCache {
   void ReleaseCentral() {
     freelist().ReleaseSpans();
   }
+  // Sun:
+  void UpdateSpanLife(HpMap &hpMap){
+    freelist().UpdateSpanLife(hpMap);
+  }
 
   // Returns the number of free objects in the transfer cache.
   size_t tc_length() {
@@ -615,6 +619,10 @@ class LockFreeTransferCache {
   // Sun: release related central freelist spans
   void ReleaseCentral() {
     freelist_.ReleaseSpans();
+  }
+  // Sun:
+  void UpdateSpanLife(HpMap &hpMap){
+    freelist_.UpdateSpanLife(hpMap);
   }
 
   // Returns the number of free objects in the transfer cache.

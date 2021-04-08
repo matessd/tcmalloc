@@ -174,6 +174,7 @@ bool Span::FreelistPush(void* ptr, size_t size) {
   /*if (allocated_ == 1) {
     return false;
   }*/
+  //Sun: 
   bool ret = true;
   if (allocated_ == 1) {
     ret=false;

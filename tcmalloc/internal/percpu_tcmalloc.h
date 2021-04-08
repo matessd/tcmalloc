@@ -19,8 +19,8 @@
 
 #include <atomic>
 #include <cstring>
-//mycode
-#include <map>
+//sun
+#include "tcmalloc/internal/my_stl.h"
 #include "tcmalloc/static_vars.h"
 
 #include "absl/base/dynamic_annotations.h"
@@ -62,7 +62,6 @@ struct CpuStats{
   size_t hps;    //number of hugepages
   size_t bytes;  //bytes of objects
 };
-typedef std::map<uintptr_t,size_t> HpMap;
 
 namespace subtle {
 namespace percpu {

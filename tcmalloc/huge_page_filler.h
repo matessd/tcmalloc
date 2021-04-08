@@ -32,13 +32,8 @@
 #include "tcmalloc/internal/timeseries_tracker.h"
 #include "tcmalloc/span.h"
 #include "tcmalloc/stats.h"
-//sun:
-#include <set>
 
 namespace tcmalloc {
-
-// sun:
-typedef std::set<uintptr_t> HpSet;
 
 // Tracks correctness of skipped subrelease decisions over time.
 template <size_t kEpochs = 16>

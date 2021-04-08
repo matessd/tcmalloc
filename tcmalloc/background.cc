@@ -100,7 +100,6 @@ void MallocExtension_Internal_ProcessBackgroundActions() {
     if (bytes_to_release > 0) {  // may be negative if time goes backwards
       tcmalloc::MallocExtension::ReleaseMemoryToSystem(bytes_to_release);
     }
-
     tcmalloc::ReleasePerCpuMemoryToOS();
 
     prev_time = now;
