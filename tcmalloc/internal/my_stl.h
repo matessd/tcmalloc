@@ -16,7 +16,7 @@ typedef std::set<uintptr_t> HpSet;
 typedef std::map<uintptr_t,size_t> HpMap;
 
 // A well-typed and sorted intrusive doubly linked list.
-template <typename T, typename Comp>
+template <typename T>
 class TSortedList {
  private:
   class Iter;
@@ -26,7 +26,7 @@ class TSortedList {
   // class MyListItems : public TSortedList<MyListItems, Functor>::Elem { ...
   class Elem {
     friend class Iter;
-    friend class TSortedList<T, Comp>;
+    friend class TSortedList<T>;
     Elem *next_;
     Elem *prev_;
 
@@ -84,6 +84,12 @@ class TSortedList {
   // Returns first element in the list. The list must not be empty.
   T *first() const {
     ASSERT(!empty());
+    /*if(head_.next_!=head_.prev_){
+      T* ptr1 = static_cast<T *>(head_.next_);
+      T* ptr2 = static_cast<T *>(head_.next_->next_);
+      ASSERT(*ptr2>*ptr1);
+      Log(kLog, __FILE__, __LINE__, "11");
+    }*/
     return static_cast<T *>(head_.next_);
   }
 
@@ -107,7 +113,12 @@ class TSortedList {
       return;
     }
     T* cur = static_cast<T *>(head->next_);
-    while(Comp()(item, cur) && cur!=head){
+    //while(Comp()(item, cur) && cur!=head){
+  #if defined(TCMALLOC_LOW_ADDRESS_FIRST)
+    while(*item>*cur && cur!=head){
+  #else 
+    while(*item<*cur && cur!=head){
+  #endif
       cur = static_cast<T *>(cur->next_);
     }
     cur->prepend(item); 

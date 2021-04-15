@@ -337,12 +337,16 @@ HugeAddressMap::Node *HugeCache::Find(HugeLength n) {
   HugeAddressMap::Node *best = nullptr;
   while (curr && curr->longest() >= n) {
     if (curr->range().len() >= n) {
-    #ifndef TCMALLOC_LOW_ADDRESS_FIRST
-      if (!best || best->range().len() > curr->range().len()) {
+    #if defined(TCMALLOC_LOW_ADDRESS_FIRST)
+      if (!best || best->range().start() > curr->range().start()) {
+        best = curr;
+      }
+    #elif defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+      if (!best || best->range().start() < curr->range().start()) {
         best = curr;
       }
     #else
-      if (!best || best->range().start() > curr->range().start()) {
+      if (!best || best->range().len() > curr->range().len()) {
         best = curr;
       }
     #endif
@@ -361,7 +365,11 @@ HugeAddressMap::Node *HugeCache::Find(HugeLength n) {
       curr = left;
       continue;
     }
-  #ifndef TCMALLOC_LOW_ADDRESS_FIRST
+  #if defined(TCMALLOC_LOW_ADDRESS_FIRST)
+    curr = left;
+  #elif defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+    curr = right;
+  #else
     // Here, we have a nontrivial choice.
     if (left->range().len() == right->range().len()) {
       if (left->longest() <= right->longest()) {
@@ -377,8 +385,6 @@ HugeAddressMap::Node *HugeCache::Find(HugeLength n) {
     } else {
       curr = right;
     }
-  #else
-    curr = left;
   #endif
   }
   return best;

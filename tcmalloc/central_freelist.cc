@@ -45,7 +45,7 @@ Span* CentralFreeList::ReleaseToSpans(void* object, Span* span) {
     // sun: remove from empty_
     span->RemoveFromList();
   #endif
-  #ifdef TCMALLOC_LOW_ADDRESS_FIRST
+  #if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
     nonempty_.insert(span);
   #else
     nonempty_.prepend(span);
@@ -155,7 +155,7 @@ void CentralFreeList::Populate() ABSL_NO_THREAD_SAFETY_ANALYSIS {
 
   // Add span to list of non-empty spans
   lock_.Lock();
-  #ifdef TCMALLOC_LOW_ADDRESS_FIRST
+  #if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
     nonempty_.insert(span);
   #else
     nonempty_.prepend(span);

@@ -153,16 +153,33 @@ using tcmalloc::HpMap;
 using tcmalloc::HpSet;
 #include <unistd.h> //getpid()
 
+// Extract interesting stats
+struct TCMallocStats {
+  uint64_t thread_bytes;            // Bytes in thread caches
+  uint64_t central_bytes;           // Bytes in central cache
+  uint64_t transfer_bytes;          // Bytes in central transfer cache
+  uint64_t metadata_bytes;          // Bytes alloced for metadata
+  uint64_t per_cpu_bytes;           // Bytes in per-CPU cache
+  uint64_t pagemap_root_bytes_res;  // Resident bytes of pagemap root node
+  uint64_t percpu_metadata_bytes_res;  // Resident bytes of the per-CPU metadata
+  AllocatorStats tc_stats;          // ThreadCache objects
+  AllocatorStats span_stats;        // Span objects
+  AllocatorStats stack_stats;       // StackTrace objects
+  AllocatorStats bucket_stats;      // StackTraceTable::Bucket objects
+  size_t pagemap_bytes;             // included in metadata bytes
+  size_t percpu_metadata_bytes;     // included in metadata bytes
+  tcmalloc::BackingStats pageheap;  // Stats from page heap
+};
+
+static void ExtractTCMallocStats(TCMallocStats* r, bool report_residence);
+
+static uint64_t InUseByApp(const TCMallocStats& stats);
+
 // StatTracker is a singleton class which can be used to periodically 
 // get tcmalloc stat information
+extern char* __progname;
 struct StatTracker {
 private:
-  static StatTracker* trackerInstance;
-  std::string fileDir;
-  int fileCounter;
-  int pid, ppid;
-  const double MiB;
-  std::thread t1, t2;
   // utilization of huge page
   struct HugePageUtilize {
     int existed_times; //exist for how many time points
@@ -173,12 +190,33 @@ private:
     }
   };
   typedef std::map<uintptr_t,HugePageUtilize> UtilMap;
+  UtilMap uMap_;
+
+  static StatTracker* trackerInstance;
+  std::string fileDir;
+  int fileCounter;
+
+  int pid_, ppid_, hpCnt_, peakHpCnt_;
+  double util_, coverage_, aveCoverage_, peakCoverage_, aveHpCnt_;
+
+  uint64_t rss_, peak_rss_;
+  uint64_t appMem_, peakAppMem_;
+  double ave_rss_, aveAppMem_;
+
+  const double MiB;
+  std::thread t1, t2;
 
   StatTracker(): MiB(1048576.0){
     fileDir = "./";
-    pid=getpid(), ppid=getppid();
-    //std::filesystem::create_directories("/a/b/c/d");
+    pid_=getpid(), ppid_=getppid();
     fileCounter = 0;
+
+    hpCnt_ = 0, aveHpCnt_ = 0, peakHpCnt_ = 0;
+    coverage_ = 0, aveCoverage_ = 0, peakCoverage_ = 0;
+    rss_ = 0, peak_rss_ = 0, ave_rss_ = 0;
+    appMem_ = 0, peakAppMem_= 0, aveAppMem_ = 0;
+
+    uMap_.clear();
     //MiB = 1048576.0;
     
     t1 = std::thread(&StatTracker::backgroundTask, this);
@@ -200,25 +238,29 @@ public:
   }
 
 private:
-  // add new hugepages in hpSet to uMap
-  inline void AddUtilizeElems(UtilMap &uMap, HpSet &hpSet){
-    for(auto &elem: hpSet){
-      if(uMap.find(elem)==uMap.end()) {
-        uMap[elem]=HugePageUtilize{0,0};
-      }
-    }
-  }
-
-  // add new hugepages in hpSet to uMap
-  inline void AddUtilizeElems(UtilMap &uMap, HpMap& hpMap){
-    for(auto &it: hpMap){
-      if(uMap.find(it.first)==uMap.end()) {
-        uMap[it.first]=HugePageUtilize{0,0};
-      }
-    }
+  static void DumpBeforeExit(){
+    trackerInstance->DumpAllStats();
   }
 
   void backgroundTask();
+
+  // add new hugepages in hpSet to uMap
+  inline void AddUtilizeElems(HpSet &hpSet){
+    for(auto &elem: hpSet){
+      if(uMap_.find(elem)==uMap_.end()) {
+        uMap_[elem]=HugePageUtilize{0,0};
+      }
+    }
+  }
+
+  // add new hugepages in hpMap to uMap
+  inline void AddUtilizeElems(HpMap& hpMap){
+    for(auto &it: hpMap){
+      if(uMap_.find(it.first)==uMap_.end()) {
+        uMap_[it.first]=HugePageUtilize{0,0};
+      }
+    }
+  }
 
   void PeriodReleaseCpu(){
     const int num_cpus = absl::base_internal::NumCPUs();
@@ -237,32 +279,37 @@ private:
     } 
   }
   
-  // compute average coverage and utilization of used hugepages
-  inline void ComputeUtilStats(UtilMap &uMap, double &ave_used_pages, double &ave_util,\
-      size_t &hp_cnt){
+  // compute average coverage_ and utilization of used hugepages
+  inline void ComputeUtilStats(){
     double tot_used_pages=0, tot_util=0;
-    hp_cnt=0;
-    for(auto it=uMap.begin(); it!=uMap.end(); it++){
+    hpCnt_=0;
+    for(auto it=uMap_.begin(); it!=uMap_.end(); it++){
       uintptr_t hpId = it->first;
       void *hpAddr = (void*)(hpId<<tcmalloc::kHugePageShift);
       size_t used_pages = HugePageAwareAllocator::UsedPagesOfHp(hpAddr);
       // this huge page not in use, remove it
       if(used_pages == 0){
         auto tmp_it = it; it++;
-        uMap.erase(tmp_it);
-        if(it!=uMap.begin()){
+        uMap_.erase(tmp_it);
+        if(it!=uMap_.begin()){
           it--;
         }
         continue;
       }
-      hp_cnt++;
-      // sum coverage and utilization
+      hpCnt_++;
+      // sum coverage_ and utilization
       it->second.Update((double)used_pages/256);
       tot_used_pages += used_pages;
       tot_util += it->second.utilization;
     }
-    ave_used_pages = tot_used_pages/256/hp_cnt;
-    ave_util = tot_util/hp_cnt;
+    coverage_ = tot_used_pages/(256*hpCnt_);
+    util_ = tot_util/hpCnt_;
+    aveHpCnt_ = (aveHpCnt_*fileCounter + hpCnt_)/(fileCounter+1);
+    aveCoverage_ = (aveCoverage_*fileCounter + coverage_)/(fileCounter+1);
+    if(peakHpCnt_ <= hpCnt_){
+      peakCoverage_ = peakCoverage_ < coverage_? coverage_:peakCoverage_;
+      peakHpCnt_ = hpCnt_;
+    }
   }
 
   // dump local_rate stats of alloc/dealloc in cpu cache
@@ -298,33 +345,50 @@ private:
   }
 
   // dump stats of used huge pages(in central/transfer/cpu/app cache)
-  inline void DumpUsedHpStats(double &ave_used_pages, double &ave_util,\
-   size_t &hp_cnt, std::ofstream &out_file){
+  inline void DumpUsedHpStats(std::ofstream &out_file){
     out_file.seekp(0, std::ios::end);
-    out_file<<"Stats of in use huge pages(central/transfer/cpu/app)."<<std::endl;
-    out_file<<"used huge pages count: "<<hp_cnt<<std::endl;
-    out_file<<"average coverage: "<<ave_used_pages<<std::endl;
-    out_file<<"average utilization: "<<ave_util<<std::endl;
+    out_file<<"Stats of huge pages in use(central/transfer/cpu/app)."<<std::endl;
+    out_file<<"huge pages count (this time): "<<hpCnt_<<std::endl;
+    out_file<<"coverage (this time): "<<coverage_<<std::endl<<std::endl;
+
+    out_file<<"peak huge pages count (at hp peak): "<<peakHpCnt_<<std::endl;
+    out_file<<"peak coverage (at hp peak): "<<peakCoverage_<<std::endl<<std::endl;
+
+    out_file<<"average huge pages count (average over time): "<<aveHpCnt_<<std::endl;
+    out_file<<"average coverage (average over time): "<<aveCoverage_<<std::endl<<std::endl;
+
+    out_file<<"utilization(this time): "<<util_<<std::endl<<std::endl;
+
+    out_file<<"rss (this time): "<<rss_/MiB<<" MiB"<<std::endl;
+    out_file<<"peak rss: "<<peak_rss_/MiB<<" MiB"<<std::endl;
+    out_file<<"average rss: "<<ave_rss_/MiB<<" MiB"<<std::endl<<std::endl;
+
+    out_file<<"app memory (this time): "<<appMem_/MiB<<" MiB"<<std::endl;
+    out_file<<"peak app memory: "<<peakAppMem_/MiB<<" MiB"<<std::endl;
+    out_file<<"average app memory: "<<aveAppMem_/MiB<<" MiB"<<std::endl<<std::endl;
+
+    out_file<<"ave_app/ave_rss: "<<aveAppMem_/ave_rss_<<std::endl;
+
     out_file<<"-----------------------------------"<<std::endl;
   }
 
   inline void DumpLongestSpanLifeOfHp(HpMap &hpMap, std::ofstream &out_file){
     out_file.seekp(0, std::ios::end);
-    size_t hp_cnt[fileCounter+2];
+    size_t cnt_of_life[fileCounter+2];
     for(int i=0; i<fileCounter+2; i++){
-      hp_cnt[i]=0;
+      cnt_of_life[i]=0;
     }
     for(auto it=hpMap.begin(); it!=hpMap.end(); it++){
       uintptr_t hpId = it->first;
       void *hpAddr = (void*)(hpId<<tcmalloc::kHugePageShift);
       size_t life = it->second;
-      hp_cnt[life]++;
+      cnt_of_life[life]++;
     }
     out_file<<"Amount of hugepages with different longest_span_life."<<std::endl;
     out_file<<"longest_span_life   amount of hugepages"<<std::endl;
     for(int i=0; i<fileCounter+2; i++){
-      if(hp_cnt[i]!=0){
-        out_file<<i<<"                           "<<hp_cnt[i]<<std::endl;
+      if(cnt_of_life[i]!=0){
+        out_file<<i<<"                           "<<cnt_of_life[i]<<std::endl;
       }
     }
     out_file<<"-----------------------------------"<<std::endl;
@@ -341,29 +405,11 @@ private:
       Static::transfer_cache().UpdateSpanLife(hpMap, cl);
     }
   }
-};
-StatTracker* StatTracker::trackerInstance=nullptr;
 
-extern char* __progname;
-void StatTracker::backgroundTask() {
-  std::ofstream cpu_file, rate_file, out_file;
-  cpu_file.open(fileDir+"local_huge_page.data");
-  rate_file.open(fileDir+"local_rate.data");
-  // store huge page utilization stats
-  UtilMap uMap; uMap.clear();
-  // spin background 
-  while(1){
-    ReleaseAllCpu();
-    // release central freelist
-    if(fileCounter>=29){
-      //ReleaseCentralSpans();
-    }
-
-    // get official stats
-    std::string output = tcmalloc::MallocExtension::GetStats();
+  inline void UpdateAllStats(){
     // get cpu stats and alloc/dealloc rate
-    HpMap hpMap; hpMap.clear();
-    CpuStats cpu_stats = Static::cpu_cache()->GetCpuStats(hpMap);
+    /*HpMap hpMap; hpMap.clear();
+    CpuStats cpu_stats = Static::cpu_cache()->GetCpuStats(hpMap);*/
 
     // get hugepages stats from pageHeap, now is hugepage filler
     HpMap hpMap1; hpMap1.clear();
@@ -381,59 +427,86 @@ void StatTracker::backgroundTask() {
     }
     ASSERT(hpMap1.size()==offset);
   #ifdef TCMALLOC_TRACK_SPAN_LIFE
-    UpdateSpanLife(hpMap1);
+    //UpdateSpanLife(hpMap1);
   #endif
 
-    AddUtilizeElems(uMap, hpMap1); // add new elems to uMap
-    // AddUtilizeElems(uMap, hpMap);
+    AddUtilizeElems(hpMap1); // add new elems to uMap
     // compute and dump average hugepage stats
-    double ave_used_pages, ave_util; size_t hp_cnt;
-    ComputeUtilStats(uMap, ave_used_pages, ave_util, hp_cnt);
-    // dump stats
-    if (strcmp(__progname,"firefox")!=0 || pid==ppid+1){
-      //for firefox multiple process, only record main process
-      std::string outFileName = fileDir +"output"+ std::to_string(fileCounter)+".txt";
+    ComputeUtilStats();
+
+    TCMallocStats stats;
+    ExtractTCMallocStats(&stats, false);
+    appMem_ = InUseByApp(stats);
+    peakAppMem_= peakAppMem_<appMem_? appMem_:peakAppMem_;
+    aveAppMem_ = (aveAppMem_*fileCounter+appMem_)/(fileCounter+1);
+
+    tcmalloc::tcmalloc_internal::MemoryStats memstats;
+    if (tcmalloc::tcmalloc_internal::GetMemoryStats(&memstats)) {
+      rss_ = memstats.rss;
+      peak_rss_ = peak_rss_<rss_? rss_:peak_rss_;
+      ave_rss_ = (ave_rss_*fileCounter+rss_)/(fileCounter+1);
+    }
+  }
+
+  inline void DumpAllStats(){
+    std::ofstream out_file;
+
+    // firefox multiple process, only record main process
+    if (strcmp(__progname,"firefox")!=0 || pid_==ppid_+1){
+      // get official stats
+      std::string output = tcmalloc::MallocExtension::GetStats();
+
+      std::string outFileName = fileDir +"output"+ \
+          std::to_string(fileCounter)+".txt";
       out_file.open(outFileName);
       ASSERT(out_file.is_open());
-      DumpRateStats(rate_file, out_file);
-      DumpCpuStats(cpu_stats, cpu_file, out_file);
-      DumpUsedHpStats(ave_used_pages, ave_util,hp_cnt, out_file);
-      DumpLongestSpanLifeOfHp(hpMap1,out_file);
+
+      //DumpRateStats(rate_file, out_file);
+      //DumpCpuStats(cpu_stats, cpu_file, out_file);
+      DumpUsedHpStats(out_file);
+      //DumpLongestSpanLifeOfHp(hpMap1, out_file);
+
       // dump official stats
       out_file<<output;
+
       out_file.close();
     }
+  }
+};
+
+StatTracker* StatTracker::trackerInstance=nullptr;
+
+void StatTracker::backgroundTask() {
+  // dump all stats before exit
+  atexit(StatTracker::DumpBeforeExit);
+
+  std::ofstream cpu_file, rate_file, out_file;
+  //cpu_file.open(fileDir+"local_huge_page.data");
+  //rate_file.open(fileDir+"local_rate.data");
+
+  // spin background
+  while(1){
+    // flush cpu cache, useful in redis test
+    ReleaseAllCpu();
+    
+    // periodly update stats
+    UpdateAllStats();
+    //DumpAllStats();
+
     // output log to observe
     Log(kLog, __FILE__, __LINE__, __progname, getpid(), getppid());
     Log(kLog, __FILE__, __LINE__, "output:", fileCounter);
     fileCounter++;
 
-    //wait 5 seconds
-    std::this_thread::sleep_for(std::chrono::seconds(5U));
+    // wait 1 second
+    std::this_thread::sleep_for(std::chrono::seconds(1U));
   }
-  cpu_file.close();
-  rate_file.close();
+  //cpu_file.close();
+  //rate_file.close();
 }
 
 // ----------------------- IMPLEMENTATION -------------------------------
 
-// Extract interesting stats
-struct TCMallocStats {
-  uint64_t thread_bytes;            // Bytes in thread caches
-  uint64_t central_bytes;           // Bytes in central cache
-  uint64_t transfer_bytes;          // Bytes in central transfer cache
-  uint64_t metadata_bytes;          // Bytes alloced for metadata
-  uint64_t per_cpu_bytes;           // Bytes in per-CPU cache
-  uint64_t pagemap_root_bytes_res;  // Resident bytes of pagemap root node
-  uint64_t percpu_metadata_bytes_res;  // Resident bytes of the per-CPU metadata
-  AllocatorStats tc_stats;          // ThreadCache objects
-  AllocatorStats span_stats;        // Span objects
-  AllocatorStats stack_stats;       // StackTrace objects
-  AllocatorStats bucket_stats;      // StackTraceTable::Bucket objects
-  size_t pagemap_bytes;             // included in metadata bytes
-  size_t percpu_metadata_bytes;     // included in metadata bytes
-  tcmalloc::BackingStats pageheap;  // Stats from page heap
-};
 
 // Get stats into "r".  Also, if class_count != NULL, class_count[k]
 // will be set to the total number of objects of size class k in the

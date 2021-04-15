@@ -618,7 +618,11 @@ void FillerStatsTracker<kEpochs>::PrintInPbtxt(PbtxtRegion *hpaa) const {
 // Its mutating methods are annotated as requiring the pageheap_lock, in order
 // to support unlocking the page heap lock in a dynamic annotation-friendly way.
 template <MemoryModifyFunction Unback>
+#if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+class PageTracker : public TSortedList<PageTracker<Unback>>::Elem {
+#else
 class PageTracker : public TList<PageTracker<Unback>>::Elem {
+#endif
  public:
   static void UnbackImpl(void *p, size_t size) { Unback(p, size); }
 
@@ -669,6 +673,14 @@ class PageTracker : public TList<PageTracker<Unback>>::Elem {
 
   // Returns the hugepage whose availability is being tracked.
   HugePage location() const { return location_; }
+  
+  bool operator>(PageTracker<Unback> other) const{
+    return location() > other.location();
+  }
+
+  bool operator<(PageTracker<Unback> other) const{
+    return location() < other.location();
+  }
 
   // Return all unused pages to the system, mark future frees to do same.
   // Returns the count of pages unbacked.
@@ -856,7 +868,11 @@ class HugePageFiller {
   }
 
  private:
+  #if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+  typedef TSortedList<TrackerType> TrackerList;
+ #else
   typedef TList<TrackerType> TrackerList;
+ #endif
 
   // This class wraps an array of N TrackerLists and a Bitmap storing which
   // elements are non-empty.
@@ -867,7 +883,7 @@ class HugePageFiller {
 
     // Removes a TrackerType from the first non-empty freelist with index at
     // least n and returns it. Returns nullptr if there is none.
-  #ifdef TCMALLOC_LOW_ADDRESS_FIRST
+  #if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
     // sun: get lowest address trackertype
     TrackerType *GetLeast(const size_t n) {
       ASSERT(n < N);
@@ -883,7 +899,11 @@ class HugePageFiller {
           continue;
         }
         cur=lists_[j].first();
+      #if defined(TCMALLOC_LOW_ADDRESS_FIRST)
         if(cur->location()<pt->location()){
+      #elif defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+        if(cur->location()>pt->location()){
+      #endif
           ASSERT(cur->longest_free_range()>=pt->longest_free_range());
           pt = cur;
           i = j;
@@ -917,7 +937,12 @@ class HugePageFiller {
     void Add(TrackerType *pt, const size_t i) {
       ASSERT(i < N);
       ASSERT(pt != nullptr);
+    #if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+      lists_[i].insert(pt);
+      //lists_[i].prepend(pt);
+    #else
       lists_[i].prepend(pt);
+    #endif
       nonempty_.SetBit(i);
       ++size_;
     }

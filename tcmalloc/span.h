@@ -55,8 +55,8 @@ namespace tcmalloc {
 class Span;
 class SpanGreaterCmp;
 class SpanLessCmp;
-#ifdef TCMALLOC_LOW_ADDRESS_FIRST
-typedef TSortedList<Span, SpanGreaterCmp> SpanList;
+#if defined(TCMALLOC_LOW_ADDRESS_FIRST) || defined(TCMALLOC_HIGH_ADDRESS_FIRST)
+typedef TSortedList<Span> SpanList;
 #else
 typedef TList<Span> SpanList;
 #endif
@@ -114,6 +114,14 @@ class Span : public SpanList::Elem {
 
   // Returns first page of the span.
   PageId first_page() const;
+
+  bool operator>(Span other) const{
+    return first_page() > other.first_page();
+  }
+
+  bool operator<(Span other) const{
+    return first_page() < other.first_page();
+  }
 
   // Returns the last page in the span.
   PageId last_page() const;

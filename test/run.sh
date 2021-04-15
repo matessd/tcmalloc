@@ -17,4 +17,4 @@ fi
 # run
 ./singletest.sh
 # draw picture
-python3 ../draw.py
+# python3 ../draw.py
