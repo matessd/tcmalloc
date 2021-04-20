@@ -18,21 +18,21 @@ bazel
 
 1. Directory structure should look like this:
 
-   ---workspace
+   |---workspace
 
-   ​           |-------- tcmalloc(only this part in my github)
+   <<<|---- tcmalloc(only this part in my github)
 
-   ​                              |---------test(main directory for running tests)
+   <<<|<<<|----test(main directory for running tests)
 
-   ​                                      |----------redis(directory that stores test output of redis with original tcmalloc)
+   <<<|<<<|---redis(directory that stores test output of redis with original tcmalloc)
 
-   ​                                      |----------sort-redis(directory that stores test output of redis with modified tcmalloc)
+   <<<|<<<|---sort-redis(directory that stores test output of redis with modified tcmalloc)
 
-   ​           |-------- redis(src code of redis)
+   <<<|--- redis(src code of redis)
 
-   ​           |-------- mozilla(src code of firefox)
+   <<<|---mozilla(src code of firefox)
 
-   ​           |-------- other src_directory
+   <<<|---other src_directory
 
 2. How to build and run redis test:
 
@@ -90,6 +90,7 @@ bazel
       ./run.sh firefox
       (Or ./runSort.sh sort-firefox) 
       (tcmalloc will be replaced by LD_PRELOAD, command is in tcmalloc/test/firefox/singletest.sh)
+      ```
    ```
    
    6. At the first time for running firefox:
@@ -98,6 +99,7 @@ bazel
       2. search "autostart", set all to **false** 
       3. set "dom.ipc.processCount" to **0**
       4. It is because multi-process mode can't be off in newest firefox version ("export MOZ_FORCE_DISABLE_E10S" also can't work). These measures can decrease the number of processes.
+   ```
 
 ## Description for some files and functions
 1. **outputxxx.txt** contains detail stats of test.
