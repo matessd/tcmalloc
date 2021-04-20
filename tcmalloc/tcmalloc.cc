@@ -219,7 +219,7 @@ private:
     uMap_.clear();
     //MiB = 1048576.0;
     
-    t1 = std::thread(&StatTracker::backgroundTask, this);
+    t1 = std::thread(&StatTracker::BackgroundTask, this);
     //set releaseRate, default is 0
     //tcmalloc::MallocExtension::SetBackgroundReleaseRate(\
        static_cast<tcmalloc::MallocExtension::BytesPerSecond>(1ul<<20));
@@ -242,7 +242,7 @@ private:
     trackerInstance->DumpAllStats();
   }
 
-  void backgroundTask();
+  void BackgroundTask();
 
   // add new hugepages in hpSet to uMap
   inline void AddUtilizeElems(HpSet &hpSet){
@@ -407,7 +407,7 @@ private:
   }
 
   inline void UpdateAllStats(){
-    // get cpu stats and alloc/dealloc rate
+    // get cpu stats
     /*HpMap hpMap; hpMap.clear();
     CpuStats cpu_stats = Static::cpu_cache()->GetCpuStats(hpMap);*/
 
@@ -452,6 +452,7 @@ private:
     std::ofstream out_file;
 
     // firefox multiple process, only record main process
+    //Log(kLog, __FILE__, __LINE__, "end_process_id: ", pid_, ppid_);
     if (strcmp(__progname,"firefox")!=0 || pid_==ppid_+1){
       // get official stats
       std::string output = tcmalloc::MallocExtension::GetStats();
@@ -476,7 +477,7 @@ private:
 
 StatTracker* StatTracker::trackerInstance=nullptr;
 
-void StatTracker::backgroundTask() {
+void StatTracker::BackgroundTask() {
   // dump all stats before exit
   atexit(StatTracker::DumpBeforeExit);
 
@@ -491,7 +492,9 @@ void StatTracker::backgroundTask() {
     
     // periodly update stats
     UpdateAllStats();
-    //DumpAllStats();
+    if (strcmp(__progname,"firefox")!=0 || pid_==ppid_+1){
+      DumpAllStats();
+    }
 
     // output log to observe
     Log(kLog, __FILE__, __LINE__, __progname, getpid(), getppid());

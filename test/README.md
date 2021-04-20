@@ -3,12 +3,12 @@ Tensorflow tests come from https://github.com/whybfq/tensorflow2.git and https:/
 
 Tests have been modified a little.
 
-## Plateform
-Linux System(supports restartable_sequence and huge page)
+## Plateform and PreCondition
+Linux System(should support **restartable_sequence** and **huge page**)
 
 Python3
 
-Tensorflow_gpu2(for tensorflow test, seems this test needless)
+Tensorflow2(for tensorflow test. Seems this test useless now, because its hugepage coverage is high)
 
 GCC version that supports C++17
 
@@ -16,38 +16,57 @@ bazel
 
 ## How to build and test somes tests
 
-1. Directory structure like this:
+1. Directory structure should look like this:
 
    ---workspace
 
-   ​           |-------- tcmalloc(in my github, only this part)
+   ​           |-------- tcmalloc(only this part in my github)
 
-   ​                              |-----------test(main directory for running tests)
+   ​                              |---------test(main directory for running tests)
+
+   ​                                      |----------redis(directory that stores test output of redis with original tcmalloc)
+
+   ​                                      |----------sort-redis(directory that stores test output of redis with modified tcmalloc)
 
    ​           |-------- redis(src code of redis)
 
-   ​           |-------- mozilla
-   
-   ​           |-------- other src_directory that too large 
+   ​           |-------- mozilla(src code of firefox)
+
+   ​           |-------- other src_directory
 
 2. How to build and run redis test:
 
-   1. get source code from github.
+   1. Get source code from github.(https://github.com/redis/redis)
 
-   2. in worksapce/redis/src/Makefile, find the word "FINAL_LDFLAGS", then add two lines there:
+   2. ```
+      cd workspace/redis/src
+      make
+      cp redis-benchmark workspace/tcmalloc/test/redis
+      cp redis-benchmark workspace/tcmalloc/test/sort-redis
+      ```
+
+      These command will build original version of redis and copy original redis-benchmark to test directory.
+
+   3. In worksapce/redis/src/Makefile, find where "FINAL_LDFLAGS" defines, then add two lines here:
 
       1. ```
          FINAL_LDFLAGS+= -L../../tcmalloc/bazel-bin/tcmalloc
          FINAL_LIBS+= -ltcmalloc
          ```
 
-      2. Then come back to tcmalloc/test, use run.sh to build and run.
+      2. Then come to tcmalloc/test, 
 
-3. How to build and run firefox test:
+         ```
+         ./run.sh redis
+         (Or ./runSort.sh sort-redis)
+         (it will build and test tcmalloc version redis-server)
+         ```
 
-   1. using hg to pull source code of firefox, rename as mozilla.
+3. How to build and run firefox test(https://firefox-source-docs.mozilla.org/contributing/coantribution_quickref.html):
 
-   2. Then create file "mozconfig", add three lines:
+   1. Use hg to pull source code of firefox, rename directory as mozilla.
+
+   2. Then create file "mozconfig" in src code directory, add three lines:
 
       1. ```
          ac_add_options --with-ccache=sccache
@@ -59,23 +78,35 @@ bazel
 
       3. disable jemalloc for replacing tcmalloc, otherwise tcmalloc can't work.
 
-      4. disable sanbox, otherwise have no access to create output file.
+      4. disable sanbox, otherwise program will have no access to create output file.
 
-   3. The first time that run firefox, create "profile" directory in /tcmalloc/test/firefox/ 
+   3. Then build firefox according to official doc.
 
-   4. In **about:config** page, set **browser.tabs.remote.autostart = false** to decrease processes amount. (multi-process mode can't be off in newest version, "export MOZ_FORCE_DISABLE_E10S" also can't work). When running for a while, there should be only an extra socket process.
+   4. Create "profile" directory in tcmalloc/test/firefox/ and tcmalloc/test/sort-firefox/
 
-4. ./run.sh test_dirctory
+   5. In tcmalloc/test/
 
-## Some stats files
-1. overall stats of local_hugepages 
-   1. In **local_huge_page.data**, each line is a record, which consists of two number. The former one is bytes of local unique hugepages(MiB), and the next one is bytes in cpu cache(MiB).
-   2. **local_huge_page.png** is the picture of data above.
-2. stats of local rate in cpu cache
-   1. In **local_rate.data**, four lines a record, each record contains cpu id, and allocate and deallocate times in this cpu.
-   2. **local_rate.png** is the picture of data above. Value of y is allocate/deallocate, y=0 means allocate or deallocate times equals 0.
-3. **outputxxx.txt** contains detail stats of hugepages in cpu cache.
+      ```
+      ./run.sh firefox
+      (Or ./runSort.sh sort-firefox) 
+      (tcmalloc will be replaced by LD_PRELOAD, command is in tcmalloc/test/firefox/singletest.sh)
+   ```
+   
+   6. At the first time for running firefox:
+   
+      1. open **about:config** page
+      2. search "autostart", set all to **false** 
+      3. set "dom.ipc.processCount" to **0**
+      4. It is because multi-process mode can't be off in newest firefox version ("export MOZ_FORCE_DISABLE_E10S" also can't work). These measures can decrease the number of processes.
 
-## Something important
+## Description for some files and functions
+1. **outputxxx.txt** contains detail stats of test.
+   1. For redis, I can just use atexit() to only one output stats before program ends.
+   2. But for firefox, It seems the root(parent) process will not call the function registered by atexit(), so need to output every second.
+   3. So in redis test, comment the use of function DumpAllStats() in BackgroundTask(). In firefox, use it to output every second.
+2. **run.sh** and **runSort.sh** will clean last output, rebuild tcmalloc, and run test.
+3. **debug.sh** can build and tcmalloc with gdb information and run it.
+4. **draw.py** was used to draw picture of local cpu stats, now I comment this part code.
+5. The top level of modified tcmalloc is in tcmalloc.cc, and see the function "BackgroundTask". It keeps loop at background, and will record stats and do some measures per second.
 
-1. about sort central freelist:
+## Other important

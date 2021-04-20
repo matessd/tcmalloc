@@ -108,9 +108,9 @@ class CPUCache {
   // get per-cpu-stats using fuction from percpu_tcmalloc.h
   CpuStats GetCpuStats(HpMap &hpMap);
 
-  // used for recording rate of alloc/dealloc
+  // sun: used for recording rate of alloc/dealloc
   CpuLocalRate* local_rate_;
-  // init local_rate_
+  // sun: init local_rate_
   void CpuLocalRateInit(int num_cpus){
     local_rate_ = reinterpret_cast<CpuLocalRate *>(
       Static::arena()->Alloc(sizeof(CpuLocalRate) * num_cpus));
@@ -228,8 +228,8 @@ inline void *ABSL_ATTRIBUTE_ALWAYS_INLINE CPUCache::Allocate(size_t cl) {
       return ret;
     }
   };
-  int cpu = subtle::percpu::GetCurrentVirtualCpu();
-  local_rate_[cpu].alloc_times.fetch_add(1,std::memory_order_relaxed);
+  //int cpu = subtle::percpu::GetCurrentVirtualCpu();
+  //local_rate_[cpu].alloc_times.fetch_add(1,std::memory_order_relaxed);
   // sun: test
   /*void* batch[1];
   Static::transfer_cache().RemoveRange(cl, batch, 1);
@@ -251,8 +251,8 @@ inline void ABSL_ATTRIBUTE_ALWAYS_INLINE CPUCache::Deallocate(void *ptr,
       return Static::cpu_cache()->Overflow(ptr, cl, cpu);
     }
   };
-  int cpu = subtle::percpu::GetCurrentVirtualCpu();
-  local_rate_[cpu].dealloc_times.fetch_add(1,std::memory_order_relaxed);
+  //int cpu = subtle::percpu::GetCurrentVirtualCpu();
+  //local_rate_[cpu].dealloc_times.fetch_add(1,std::memory_order_relaxed);
   // sun: test
   /*void *batch[1];
   batch[0]=ptr;
