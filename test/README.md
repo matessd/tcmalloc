@@ -20,13 +20,13 @@ bazel
 
    |---workspace
 
-   <<<|---- tcmalloc(only this part in my github)
+   <<<|--- tcmalloc(only this part in my github)
 
-   <<<|<<<|----test(main directory for running tests)
+   <<<|<<<|---test(main directory for running tests)
 
-   <<<|<<<|---redis(directory that stores test output of redis with original tcmalloc)
+   <<<|<<<|<<<|---redis(directory that stores test output of redis)
 
-   <<<|<<<|---sort-redis(directory that stores test output of redis with modified tcmalloc)
+   <<<|<<<|<<<|---firefox(directory that stores test output of firefox)
 
    <<<|--- redis(src code of redis)
 
@@ -42,10 +42,10 @@ bazel
       cd workspace/redis/src
       make
       cp redis-benchmark workspace/tcmalloc/test/redis
-      cp redis-benchmark workspace/tcmalloc/test/sort-redis
+      cp redis-cli workspace/tcmalloc/test/redis
       ```
 
-      These command will build original version of redis and copy original redis-benchmark to test directory.
+      These command will build original version of redis, copy original redis-benchmark and redis-cli to test directory.
 
    3. In worksapce/redis/src/Makefile, find where "FINAL_LDFLAGS" defines, then add two lines here:
 
@@ -58,9 +58,11 @@ bazel
 
          ```
          ./run.sh redis
-         (Or ./runSort.sh sort-redis)
+         (Or ./runSort.sh redis, this will build and test new tcmalloc)
          (it will build and test tcmalloc version redis-server)
          ```
+      
+   4. directory "old" stores my output of old tcmalloc, and directory "new" is output of new tcmalloc, other test the same.
 
 3. How to build and run firefox test(https://firefox-source-docs.mozilla.org/contributing/coantribution_quickref.html):
 
@@ -82,13 +84,13 @@ bazel
 
    3. Then build firefox according to official doc.
 
-   4. Create "profile" directory in tcmalloc/test/firefox/ and tcmalloc/test/sort-firefox/
+   4. Create "profile" directory in tcmalloc/test/firefox/
 
    5. In tcmalloc/test/
 
       ```
       ./run.sh firefox
-      (Or ./runSort.sh sort-firefox) 
+      (Or ./runSort.sh firefox) 
       (tcmalloc will be replaced by LD_PRELOAD, command is in tcmalloc/test/firefox/singletest.sh)
       ```
    ```
@@ -106,9 +108,19 @@ bazel
    1. For redis, I can just use atexit() to only one output stats before program ends.
    2. But for firefox, It seems the root(parent) process will not call the function registered by atexit(), so need to output every second.
    3. So in redis test, comment the use of function DumpAllStats() in BackgroundTask(). In firefox, use it to output every second.
+   
 2. **run.sh** and **runSort.sh** will clean last output, rebuild tcmalloc, and run test.
+
 3. **debug.sh** can build and tcmalloc with gdb information and run it.
-4. **draw.py** was used to draw picture of local cpu stats, now I comment this part code.
+
+4. In subtest directory, like redis, you can
+
+   ```
+   python3 ../draw.py
+   ```
+
+   to draw RSS graph, but make sure old_rss.data and new_rss.data in this directory
+
 5. The top level of modified tcmalloc is in tcmalloc.cc, and see the function "BackgroundTask". It keeps loop at background, and will record stats and do some measures per second.
 
 ## Other important

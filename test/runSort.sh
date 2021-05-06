@@ -1,8 +1,8 @@
 #!/bin/sh
 # build first
 bazel build //tcmalloc:libtcmalloc.so --copt -DTCMALLOC_HIGH_ADDRESS_FIRST\
-  --copt -DTCMALLOC_TRANSFER_OFF \
-  --copt -DTCMALLOC_TRACK_SPAN_LIFE
+ --copt -DTCMALLOC_TRANSFER_OFF
+#  --copt -DTCMALLOC_TRACK_SPAN_LIFE
 if [ $? -eq 1 ]; then
   exit 1
 fi

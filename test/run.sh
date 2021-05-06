@@ -1,6 +1,8 @@
 #!/bin/sh
 # build first
-bazel build //tcmalloc:libtcmalloc.so --copt -DTCMALLOC_TRANSFER_OFF --copt -DTCMALLOC_TRACK_SPAN_LIFE
+bazel build //tcmalloc:libtcmalloc.so\
+ --copt -DTCMALLOC_TRANSFER_OFF
+#--copt -DTCMALLOC_TRACK_SPAN_LIFE
 # build fail
 if [ $? -eq 1 ]; then
   exit 1

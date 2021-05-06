@@ -65,6 +65,45 @@ def draw_local_rate():
     plt.savefig('local_rate.png')
     #plt.show()
 
+def load_data(filename):
+  y_data = []
+  with open(filename,'r+') as f:
+    lines = f.readlines()
+    for line in lines:
+      y = line.strip().split()
+      y_data.append(float(y[0]))
+  return y_data
+
+def draw_rss():
+  x=0; x_data = []
+  y1_data = load_data("old_rss.data")
+  y2_data = load_data("new_rss.data")
+  size = max(len(y1_data),len(y2_data))
+  y1_data = y1_data[0:size]
+  y2_data = y2_data[0:size]
+  for i in range(0, size):
+    x_data.append(x)
+    x=x+0.5
+  plt.figure(figsize=(20, 10), dpi=80)
+  plt.plot(x_data[0:len(y1_data)], y1_data, label='flush CPU Cache')
+  plt.plot(x_data[0:len(y2_data)], y2_data, label='flush CPU Cache+First Fit')
+  plt.xlabel('Time Since TCMalloc Initialized(seconds)',size=20)
+  plt.ylabel('RSS(MB)',size=20)
+  plt.legend(fontsize=15,loc='best')
+  """for i in range(1,len(y1_data)-1):
+    if y1_data[i]>y1_data[i-1] and y1_data[i]>y1_data[i+1]:
+      plt.text(x_data[i],y1_data[i],str(round(y1_data[i],2)),\
+      ha='center',va='bottom',fontsize=15)
+  for i in range(1,len(y2_data)-1):
+    if y2_data[i]>y2_data[i-1] and y2_data[i]>y2_data[i+1]:
+      plt.text(x_data[i],y2_data[i],str(round(y2_data[i],2)),\
+      ha='center',va='top',fontsize=15)"""
+  plt.title('RSS of Firefox Benchmark',size=20)
+  plt.savefig('rss.png')
+  plt.show()
+  return
+
 if __name__ == '__main__':
-  draw_local_hp()
-  draw_local_rate()
+  #draw_local_hp()
+  #draw_local_rate()
+  draw_rss()
